@@ -1,7 +1,9 @@
 package com.jsrdev.screenmatch.model
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class SeriesData(
     @JsonAlias("Title") val title: String,
     @JsonAlias("Year") val year: String,

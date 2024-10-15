@@ -6,7 +6,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
-class GetData: ApiService {
+class GetFilmData: ApiService {
 
     override fun getData(url: String): String {
         val client = HttpClient.newHttpClient()

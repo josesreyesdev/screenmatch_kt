@@ -1,6 +1,8 @@
 package com.jsrdev.screenmatch.main
 
-import com.jsrdev.screenmatch.service.GetData
+import com.jsrdev.screenmatch.model.SeriesData
+import com.jsrdev.screenmatch.service.ConvertData
+import com.jsrdev.screenmatch.service.GetFilmData
 import com.jsrdev.screenmatch.utils.Config
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -8,12 +10,15 @@ import java.nio.charset.StandardCharsets
 class Films {
 
     fun data() {
-        val seriesName = encodedAndFormatSeriesName("Game of thrones")
+        val seriesName = encodedAndFormatSeriesName("Vikings")
         val url = buildURL(seriesName, null, null)
 
-        val json = GetData().getData(url = url)
-
+        val json = GetFilmData().getData(url = url)
         println("Response: $json")
+
+        val convertData = ConvertData().getData(json, SeriesData::class.java)
+        println("SeriesData: $convertData")
+        println("SeriesData title: ${convertData.title}")
     }
 
     private fun encodedAndFormatSeriesName(seriesName: String): String {

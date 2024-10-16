@@ -1,5 +1,6 @@
 package com.jsrdev.screenmatch.main
 
+import com.jsrdev.screenmatch.model.EpisodeData
 import com.jsrdev.screenmatch.model.SeriesData
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
@@ -11,14 +12,30 @@ class Films {
 
     fun data() {
         val seriesName = encodedAndFormatSeriesName("Vikings")
+
+        // Series
+        val series = getSeriesData(seriesName)
+        println("Series: $series")
+
+        // Episodes
+        val episodes = getEpisodesData(seriesName, "1", "1")
+        println("Episodes: $episodes")
+    }
+
+    private fun getSeriesData(seriesName: String): SeriesData{
+
         val url = buildURL(seriesName, null, null)
-
         val json = GetFilmData().getData(url = url)
-        println("Response: $json")
 
-        val convertData = ConvertData().getData(json, SeriesData::class.java)
-        println("SeriesData: $convertData")
-        println("SeriesData title: ${convertData.title}")
+        return ConvertData().getData(json, SeriesData::class.java)
+    }
+
+    private fun getEpisodesData(seriesName: String, season: String, episode: String): EpisodeData {
+
+        val url = buildURL(seriesName, season, episode)
+        val json = GetFilmData().getData(url = url)
+
+        return ConvertData().getData(json, EpisodeData::class.java)
     }
 
     private fun encodedAndFormatSeriesName(seriesName: String): String {

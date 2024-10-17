@@ -9,18 +9,43 @@ import com.jsrdev.screenmatch.utils.Config
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class Films {
+class FilmsMain {
 
-    fun data() {
-        val seriesName = encodedAndFormatSeriesName("Vikings")
+    fun showMenu() {
+        while(true) {
+            var inputSeriesName = getEntryData()
+            while (inputSeriesName.isNullOrEmpty()) {
+                println("Entrada no válida, intenta de nuevo")
+                inputSeriesName = getEntryData()
+            }
+            inputSeriesName = inputSeriesName.trim().lowercase()
+
+            if (inputSeriesName.equals("n", ignoreCase = false)) {
+                println("Ejecución Finalizada")
+                break
+            }
+
+            val seriesName = encodedAndFormatSeriesName(inputSeriesName)
+
+            data(seriesName)
+        }
+    }
+
+    private fun getEntryData(): String? {
+        println()
+        println("Escribe el nombre de la serie que deseas buscar o N para salir de la ejecucion: ")
+        return readlnOrNull()
+    }
+
+    private fun data(seriesName: String) {
 
         // Series
         val series = getSeriesData(seriesName)
         println("Series: $series")
 
         // Episodes
-        val episodes = getEpisodesData(seriesName, 1, 1)
-        println("Episodes: $episodes")
+        //val episodes = getEpisodesData(seriesName, 1, 1)
+        //println("Episodes: $episodes")
 
         // Seasons
         val seasons = mutableListOf<SeasonData>()

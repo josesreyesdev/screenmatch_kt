@@ -25,6 +25,6 @@ data class SeriesData(
     @JsonAlias("imdbVotes") val imdbVotes: String = "",
     @JsonAlias("imdbID") val imdbID: String = "",
     @JsonAlias("Type") val type: String = "",
-    @JsonAlias("totalSeasons") val totalSeasons: Int = 0,
+    @JsonAlias("totalSeasons") val totalSeasons: String = "",
     @JsonAlias("Response") val response: Boolean = false
 )

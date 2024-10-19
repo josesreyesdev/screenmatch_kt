@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets
 class FilmsMain {
 
     fun showMenu() {
-        while(true) {
+        while (true) {
             var inputSeriesName = getEntryData()
             while (inputSeriesName.isNullOrEmpty()) {
                 println("Entrada no válida, intenta de nuevo")
@@ -41,7 +41,6 @@ class FilmsMain {
 
         // Series
         val series = getSeriesData(seriesName)
-        println("Series: $series")
 
         // Episodes
         //val episodes = getEpisodesData(seriesName, 1, 1)
@@ -50,14 +49,29 @@ class FilmsMain {
         // Seasons
         val seasons = mutableListOf<SeasonData>()
 
-        for (itemSeason: Int in 0..series.totalSeasons) {
-            val season: SeasonData = getSeasonData(series.title, itemSeason)
+        if (series.totalSeasons.isEmpty() || series.totalSeasons.equals("N/A", ignoreCase = false))
+            throw RuntimeException("${series.title} contains N/A or is empty in the field totalSeason")
+
+        for (ind: Int in 1..series.totalSeasons.toInt()) {
+            val seriesTitle = encodedAndFormatSeriesName(series.title)
+            val season: SeasonData = getSeasonData(seriesTitle, ind)
             seasons.add(season)
-        }
-        seasons.forEach(::println)
+        } //seasons.forEach(::println)
+
+        // Show episode title for season
+        println("************** Series: ${series.title} ***************")
+        seasons.forEachIndexed { i, s ->
+            println("Episodes from season ${i + 1} of the ${s.title} series")
+            s.episodeData.forEachIndexed { i2, e ->
+                println("   Episode ${i2 + 1}: ${e.title}")
+            }
+            println()
+        } //seasons.forEach(::println)
+        //seasons.forEach { it.episodeData.forEach { println(it.title)} }
+        println("******************************************************")
     }
 
-    private fun getSeriesData(seriesName: String): SeriesData{
+    private fun getSeriesData(seriesName: String): SeriesData {
 
         val url = buildURL(seriesName, null, null)
         val json = GetFilmData().getData(url = url)
@@ -81,8 +95,8 @@ class FilmsMain {
     }
 
     private fun encodedAndFormatSeriesName(seriesName: String): String {
-        val encodedSeriesName = URLEncoder.encode(seriesName, StandardCharsets.UTF_8)
-        return encodedSeriesName.replace("+", "%20")
+        // encodedSeriesName.replace("+", "%20")
+        return URLEncoder.encode(seriesName, StandardCharsets.UTF_8)
     }
 
     private fun buildURL(seriesName: String, seasonNumber: Int?, episodeNumber: Int?): String {

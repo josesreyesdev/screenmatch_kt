@@ -13,13 +13,17 @@ class GetFilmData: ApiService {
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .build()
-        try {
-            val jsonResponse = client.send(request, HttpResponse.BodyHandlers.ofString())
-            return jsonResponse.body()
+        return try {
+            val response = client.send(request, HttpResponse.BodyHandlers.ofString())
+            if (response.statusCode() != 200) {
+                throw RuntimeException("Error: Received status code ${response.statusCode()} from API.")
+            }
+            response.body()
         } catch (ex: IOException) {
-            throw RuntimeException(ex)
+            throw RuntimeException("Network error while making the API request: ${ex.message}", ex)
         } catch (ex: InterruptedException) {
-            throw RuntimeException(ex)
+            Thread.currentThread().interrupt()
+            throw RuntimeException("Request interrupted: ${ex.message}", ex)
         }
     }
 }

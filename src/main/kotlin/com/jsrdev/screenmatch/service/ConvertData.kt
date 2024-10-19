@@ -9,9 +9,6 @@ class ConvertData : IConvertData {
     private val objectMapper = jacksonObjectMapper()
 
     override fun <T> getData(json: String, genericClass: Class<T>): T {
-        if (json.isBlank()) {
-            throw IllegalArgumentException("Received an empty or null JSON string.")
-        }
 
         return try {
             objectMapper.readValue(json, genericClass)

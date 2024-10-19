@@ -74,7 +74,8 @@ class FilmsMain {
     private fun getSeriesData(seriesName: String): SeriesData {
 
         val url = buildURL(seriesName, null, null)
-        val json = GetFilmData().getData(url = url)
+        val json = GetFilmData().fetchData(url = url)
+        println(json)
 
         return ConvertData().getData(json, SeriesData::class.java)
     }
@@ -82,14 +83,14 @@ class FilmsMain {
     private fun getEpisodesData(seriesName: String, season: Int, episode: Int): EpisodeData {
 
         val url = buildURL(seriesName, season, episode)
-        val json = GetFilmData().getData(url = url)
+        val json = GetFilmData().fetchData(url = url)
 
         return ConvertData().getData(json, EpisodeData::class.java)
     }
 
     private fun getSeasonData(seriesName: String, season: Int): SeasonData {
         val url = buildURL(seriesName, season, null)
-        val json = GetFilmData().getData(url = url)
+        val json = GetFilmData().fetchData(url = url)
 
         return ConvertData().getData(json, SeasonData::class.java)
     }

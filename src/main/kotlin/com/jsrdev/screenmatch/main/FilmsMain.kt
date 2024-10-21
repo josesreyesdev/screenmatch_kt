@@ -1,5 +1,6 @@
 package com.jsrdev.screenmatch.main
 
+import com.jsrdev.screenmatch.model.Episode
 import com.jsrdev.screenmatch.model.EpisodeData
 import com.jsrdev.screenmatch.model.SeasonData
 import com.jsrdev.screenmatch.model.SeriesData
@@ -8,6 +9,9 @@ import com.jsrdev.screenmatch.service.GetFilmData
 import com.jsrdev.screenmatch.utils.Config
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 class FilmsMain {
 
@@ -39,29 +43,33 @@ class FilmsMain {
 
     private fun data(seriesName: String) {
 
-        // Series
-        val series: SeriesData = getSeriesData(seriesName)
+        // SeriesData
+        val seriesData: SeriesData = getSeriesData(seriesName)
 
-        if (series.totalSeasons.isEmpty() || series.totalSeasons.equals("N/A", ignoreCase = false))
-            throw RuntimeException("${series.title} contains N/A or is empty in the field totalSeason")
+        if (seriesData.totalSeasons.isEmpty() || seriesData.totalSeasons.equals("N/A", ignoreCase = false))
+            throw RuntimeException("${seriesData.title} contains N/A or is empty in the field totalSeason")
 
-        // Seasons
-        val seasons: List<SeasonData> = seasonsData(series)
-         //seasons.forEach(::println)
+        // SeasonsData
+        val seasonDataList: MutableList<SeasonData> = seasonsData(seriesData)
+        // seasonDataList.forEach(::println)
 
-        // Episodes
-        //printEpisodesData(seasons = seasons)
+        // EpisodesData
+        // printEpisodesData(seasons = seasonDataList)
 
-        val episodes: List<EpisodeData> = episodesData(seasons)
+        val episodeDataList: MutableList<EpisodeData> = episodesData(seasonDataList)
 
-        // Top 5 episodes
-        println("********************* Top 5 Episodes of ${series.title} ***********************")
-        top5Episodes(episodes = episodes)
+        // Top 5 episodes from EpisodeData
+        //println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
+        //top5Episodes(episodes = episodeDataList)
+
+        // Episode
+        val episodes = episode(seasonDataList)
+        episodes.forEach(::println)
 
 
     }
 
-    private fun seasonsData(series: SeriesData): List<SeasonData> {
+    private fun seasonsData(series: SeriesData): MutableList<SeasonData> {
         val seasons = mutableListOf<SeasonData>()
 
         for (ind: Int in 1..series.totalSeasons.toInt()) {
@@ -87,10 +95,10 @@ class FilmsMain {
         println("******************************************************")
     }
 
-    private fun episodesData(seasons: List<SeasonData>): List<EpisodeData> {
+    private fun episodesData(seasons: List<SeasonData>): MutableList<EpisodeData> {
         return seasons.asSequence()
             .flatMap { s -> s.episodeData.asSequence() }
-            .toList()
+            .toMutableList()
     }
 
     private fun top5Episodes(episodes: List<EpisodeData>) =
@@ -99,8 +107,36 @@ class FilmsMain {
             .sortedByDescending { it.evaluation }  // Ordenamos por evaluación de forma descendente
             .take(5)
             .forEachIndexed { i, e ->
-                println("${i + 1} -> ${e.title}, evaluation: ${e.evaluation}")
+                println("${i + 1} -> ${e.title}, season: ${e.season}, evaluation: ${e.evaluation}")
             }
+
+    private fun episode(seasons: List<SeasonData>): MutableList<Episode> {
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+        return seasons.asSequence()
+            .flatMap { s ->
+                s.episodeData.asSequence()
+                    .map { e ->
+                        Episode(
+                            title = e.title.ifBlank { "Unknown Title" },
+                            season = s.season.toIntOrNull() ?: 0,
+                            episodeNumber = e.episode.toIntOrNull() ?: 0,
+                            evaluation = e.evaluation.toDoubleOrNull() ?: 0.0,
+                            releaseDate = parseReleaseDate(e.released, formatter)
+                        )
+                    }
+            }
+            .toMutableList()
+    }
+
+    private fun parseReleaseDate(released: String, formatter: DateTimeFormatter): LocalDate? {
+        return try {
+            LocalDate.parse(released, formatter)
+        } catch (e: DateTimeParseException) {
+            null
+        }
+    }
 
     /************************************** Fetch *********************************************/
     private fun getSeriesData(seriesName: String): SeriesData {

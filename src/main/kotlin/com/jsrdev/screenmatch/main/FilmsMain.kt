@@ -40,37 +40,50 @@ class FilmsMain {
     private fun data(seriesName: String) {
 
         // Series
-        val series = getSeriesData(seriesName)
-
-        // Episodes
-        //val episodes = getEpisodesData(seriesName, 1, 1)
-        //println("Episodes: $episodes")
-
-        // Seasons
-        val seasons = mutableListOf<SeasonData>()
+        val series: SeriesData = getSeriesData(seriesName)
 
         if (series.totalSeasons.isEmpty() || series.totalSeasons.equals("N/A", ignoreCase = false))
             throw RuntimeException("${series.title} contains N/A or is empty in the field totalSeason")
+
+        // Episodes
+        //val episodes = getEpisodesData(seriesName, 1, 1)
+
+        // Seasons
+        val seasons: List<SeasonData> = seasonsData(series)
+         //seasons.forEach(::println)
+
+        // Episodes
+        printEpisodesData(seasons = seasons)
+
+    }
+
+    private fun seasonsData(series: SeriesData): List<SeasonData> {
+        val seasons = mutableListOf<SeasonData>()
 
         for (ind: Int in 1..series.totalSeasons.toInt()) {
             val seriesTitle = encodedAndFormatSeriesName(series.title)
             val season: SeasonData = getSeasonData(seriesTitle, ind)
             seasons.add(season)
-        } //seasons.forEach(::println)
+        }
 
+        return seasons
+    }
+
+    private fun printEpisodesData(seasons: List<SeasonData>) {
         // Show episode title for season
-        println("************** Series: ${series.title} ***************")
+        println("************** Series: ${seasons[0].title} ***************")
         seasons.forEachIndexed { i, s ->
             println("Episodes from season ${i + 1} of the ${s.title} series")
-            s.episodeData.forEachIndexed { i2, e ->
-                println("   Episode ${i2 + 1}: ${e.title}")
+            s.episodeData.forEachIndexed { ind, e ->
+                println("   Episode ${ind + 1}: ${e.title}")
             }
             println()
-        } //seasons.forEach(::println)
+        }
         //seasons.forEach { it.episodeData.forEach { println(it.title)} }
         println("******************************************************")
     }
 
+    /************************************** Fetch *********************************************/
     private fun getSeriesData(seriesName: String): SeriesData {
 
         val url = buildURL(seriesName, null, null)

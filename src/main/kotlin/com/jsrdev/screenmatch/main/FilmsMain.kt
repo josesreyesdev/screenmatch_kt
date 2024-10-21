@@ -45,15 +45,19 @@ class FilmsMain {
         if (series.totalSeasons.isEmpty() || series.totalSeasons.equals("N/A", ignoreCase = false))
             throw RuntimeException("${series.title} contains N/A or is empty in the field totalSeason")
 
-        // Episodes
-        //val episodes = getEpisodesData(seriesName, 1, 1)
-
         // Seasons
         val seasons: List<SeasonData> = seasonsData(series)
          //seasons.forEach(::println)
 
         // Episodes
-        printEpisodesData(seasons = seasons)
+        //printEpisodesData(seasons = seasons)
+
+        val episodes: List<EpisodeData> = episodesData(seasons)
+
+        // Top 5 episodes
+        println("********************* Top 5 Episodes of ${series.title} ***********************")
+        top5Episodes(episodes = episodes)
+
 
     }
 
@@ -83,12 +87,27 @@ class FilmsMain {
         println("******************************************************")
     }
 
+    private fun episodesData(seasons: List<SeasonData>): List<EpisodeData> {
+        return seasons.asSequence()
+            .flatMap { s -> s.episodeData.asSequence() }
+            .toList()
+    }
+
+    private fun top5Episodes(episodes: List<EpisodeData>) =
+        episodes.asSequence()
+            .filter { e -> e.evaluation.isNotEmpty() && !e.evaluation.equals("N/A", ignoreCase = true) }
+            .sortedByDescending { it.evaluation }  // Ordenamos por evaluación de forma descendente
+            .take(5)
+            .forEachIndexed { i, e ->
+                println("${i + 1} -> ${e.title}, evaluation: ${e.evaluation}")
+            }
+
     /************************************** Fetch *********************************************/
     private fun getSeriesData(seriesName: String): SeriesData {
 
         val url = buildURL(seriesName, null, null)
         val json = GetFilmData().fetchData(url = url)
-        println(json)
+        //println(json)
 
         return ConvertData().getData(json, SeriesData::class.java)
     }

@@ -28,7 +28,7 @@ class GetFilmData : ApiService {
             val responseBody = response.body()
 
             val apiResponse = ConvertData().getData(responseBody, ApiResponse::class.java)
-            println(apiResponse)
+            //println(apiResponse)
 
             if (apiResponse.response.isNotEmpty() || apiResponse.error != null) {
                 if (apiResponse.response.equals("False", ignoreCase = true)) {

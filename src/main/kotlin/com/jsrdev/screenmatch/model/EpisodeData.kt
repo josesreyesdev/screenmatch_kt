@@ -10,7 +10,7 @@ data class EpisodeData(
     @JsonAlias("Rated") val rated: String = "",
     @JsonAlias("Released") val released: String = "", // fecha de lanzamiento
     @JsonAlias("Season") val season: String = "",
-    @JsonAlias("Episode") val episode: Int = 0, // num EpisodeData
+    @JsonAlias("Episode") val episode: String = "", // num EpisodeData
     @JsonAlias("Runtime") val runtime: String = "",
     @JsonAlias("Genre") val genre: String = "",
     @JsonAlias("Director") val director: String = "",

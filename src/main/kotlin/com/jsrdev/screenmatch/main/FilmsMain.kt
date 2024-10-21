@@ -66,6 +66,8 @@ class FilmsMain {
         val episodes = episode(seasonDataList)
         episodes.forEach(::println)
 
+        // Search episodes by release date
+        searchEpisodesByReleaseDate(episodes)
 
     }
 
@@ -136,6 +138,35 @@ class FilmsMain {
         } catch (e: DateTimeParseException) {
             null
         }
+    }
+
+    private fun searchEpisodesByReleaseDate(episodes: List<Episode>) {
+        var date = getEntryDate()
+        while (date == null) {
+            println("Entrada no válida, intenta de nuevo")
+            date = getEntryDate()
+        }
+
+        val searchByDate = LocalDate.of(date, 1, 1)
+
+        val dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+        episodes.asSequence()
+            //.filter { it.releaseDate?.isAfter(searchByDate) == true}
+            .filter { it.releaseDate != null && it.releaseDate.isAfter(searchByDate)}
+            .forEachIndexed {i, e ->
+                println(
+                    "${i + 1} -> Season: ${e.season}, " +
+                            "Episode: ${e.episodeNumber}.- ${e.title}, " +
+                            "Released: ${e.releaseDate?.format(dtf)}")
+            }
+
+    }
+
+    private fun getEntryDate(): Int?{
+        println()
+        println("Desde que fecha deseas ver los episodios?: ")
+        return readlnOrNull()?.toIntOrNull()
     }
 
     /************************************** Fetch *********************************************/

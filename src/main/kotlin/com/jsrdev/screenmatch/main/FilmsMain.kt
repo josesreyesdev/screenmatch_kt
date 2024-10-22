@@ -59,15 +59,16 @@ class FilmsMain {
         val episodeDataList: MutableList<EpisodeData> = episodesData(seasonDataList)
 
         // Top 5 episodes from EpisodeData
-        //println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
-        //top5Episodes(episodes = episodeDataList)
+        println()
+        println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
+        top5Episodes(episodes = episodeDataList)
 
         // Episode
         val episodes = episode(seasonDataList)
-        episodes.forEach(::println)
+        //episodes.forEach(::println)
 
         // Search episodes by release date
-        searchEpisodesByReleaseDate(episodes)
+        //searchEpisodesByReleaseDate(episodes)
 
     }
 
@@ -105,9 +106,17 @@ class FilmsMain {
 
     private fun top5Episodes(episodes: List<EpisodeData>) =
         episodes.asSequence()
-            .filter { e -> e.evaluation.isNotEmpty() && !e.evaluation.equals("N/A", ignoreCase = true) }
+            .onEach { e -> println("Before filter: ${e.title}, evaluation: ${e.evaluation}") }
+            .filter { e ->
+                e.evaluation.isNotEmpty() && !e.evaluation.equals("N/A", ignoreCase = true)
+            }
+            .onEach { e -> println("After filter: ${e.title}, evaluation: ${e.evaluation}") }
             .sortedByDescending { it.evaluation }  // Ordenamos por evaluación de forma descendente
+            .onEach { e -> println("After sort: ${e.title}, evaluation: ${e.evaluation}") }
+            .map { e -> e.copy(title = e.title.uppercase()) }
+            .onEach { e -> println("After uppercase: ${e.title}, evaluation: ${e.evaluation}") }
             .take(5)
+            .onEach { e -> println("After take: ${e.title}, evaluation: ${e.evaluation}") }
             .forEachIndexed { i, e ->
                 println("${i + 1} -> ${e.title}, season: ${e.season}, evaluation: ${e.evaluation}")
             }

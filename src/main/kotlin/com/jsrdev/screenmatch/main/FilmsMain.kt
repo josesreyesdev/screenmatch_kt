@@ -51,7 +51,7 @@ class FilmsMain {
 
         // SeasonsData
         val seasonDataList: MutableList<SeasonData> = seasonsData(seriesData)
-        // seasonDataList.forEach(::println)
+         seasonDataList.forEach(::println)
 
         // EpisodesData
         // printEpisodesData(seasons = seasonDataList)
@@ -60,15 +60,23 @@ class FilmsMain {
 
         // Top 5 episodes from EpisodeData
         println()
-        println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
-        top5Episodes(episodes = episodeDataList)
+        //println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
+        // top5Episodes(episodes = episodeDataList)
 
         // Episode
-        val episodes = episode(seasonDataList)
+        val episodes: MutableList<Episode> = episode(seasonDataList)
         //episodes.forEach(::println)
 
         // Search episodes by release date
         //searchEpisodesByReleaseDate(episodes)
+
+        // Search episodes by title
+        val episode: Episode? = searchEpisodesByTitle(episodes)
+        episode?.let {
+            println("****Episodio Encontrado****")
+            println(episode)
+            println("Episodio ${it.episodeNumber}: ${it.title}, season: ${it.season}")
+        } ?: println("Episodio no encontrado")
 
     }
 
@@ -176,6 +184,26 @@ class FilmsMain {
         println()
         println("Desde que fecha deseas ver los episodios?: ")
         return readlnOrNull()?.toIntOrNull()
+    }
+
+    private fun searchEpisodesByTitle(episodes: MutableList<Episode>): Episode? {
+        var episodeTitle = getEntryEpisodeTitle()
+        while (episodeTitle.isNullOrEmpty()) {
+            println("Entrada no válida, intenta de nuevo")
+            episodeTitle = getEntryEpisodeTitle()
+        }
+
+        return episodes.asSequence()
+            //.filter { it.title.uppercase().contains(episodeTitle.uppercase()) }
+            .filter { it.title.contains(episodeTitle, ignoreCase = true) }
+            .firstOrNull()
+
+    }
+
+    private fun getEntryEpisodeTitle(): String?{
+        println()
+        println("Ingresa el titulo del episdio que desea ver: ")
+        return readlnOrNull()
     }
 
     /************************************** Fetch *********************************************/

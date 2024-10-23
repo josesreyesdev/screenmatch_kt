@@ -1,9 +1,6 @@
 package com.jsrdev.screenmatch.main
 
-import com.jsrdev.screenmatch.model.Episode
-import com.jsrdev.screenmatch.model.EpisodeData
-import com.jsrdev.screenmatch.model.SeasonData
-import com.jsrdev.screenmatch.model.SeriesData
+import com.jsrdev.screenmatch.model.*
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
 import com.jsrdev.screenmatch.utils.Config
@@ -59,16 +56,72 @@ class FilmsMain {
         val episodeDataList: MutableList<EpisodeData> = episodesData(seasonDataList)
 
         // Top 5 episodes from EpisodeData
+        println()
         //println("********************* Top 5 Episodes of ${seriesData.title} ***********************")
-        //top5Episodes(episodes = episodeDataList)
+        // top5Episodes(episodes = episodeDataList)
 
         // Episode
-        val episodes = episode(seasonDataList)
-        episodes.forEach(::println)
+        val episodes: MutableList<Episode> = episode(seasonDataList)
+        //episodes.forEach(::println)
 
         // Search episodes by release date
-        searchEpisodesByReleaseDate(episodes)
+        //searchEpisodesByReleaseDate(episodes)
 
+        // Search episodes by title
+        //val episode: Episode? = searchEpisodesByTitle(episodes)
+        /*episode?.let {
+            println("****Episodio Encontrado****")
+            println(episode)
+            println("Episodio ${it.episodeNumber}: ${it.title}, season: ${it.season}")
+        } ?: println("Episodio no encontrado")*/
+
+        // Evaluation By Season
+        val evaluationBySeason: Map<Int, Double> = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .groupBy { it.season } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason)  ->
+                episodesBySeason.map { it.evaluation }.average() // Calculamos el promedio de evaluación por temporada
+            }
+        evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
+
+        // General Statistics
+        val stats: Statistics = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .map { it.evaluation } // extraemos evaluaciones
+            .toList()
+            .let { evaluations ->
+                Statistics(
+                    count = evaluations.size,
+                    sum = evaluations.sum(),
+                    average = evaluations.average(),
+                    min = evaluations.minOrNull() ?: 0.0,
+                    max = evaluations.maxOrNull() ?: 0.0
+                )
+            }
+        println()
+        println("Count: ${stats.count}, Sum: ${stats.sum}, Average: ${"%.2f".format(stats.average)}, Min: ${stats.min}, Max: ${stats.max}")
+
+        // General Statistics By Season
+        val statsBySeason: Map<Int, Statistics> = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .groupBy { it.season } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason)  ->
+                episodesBySeason.map { it.evaluation }
+                    .toList()
+                    .let { evaluations ->
+                        Statistics(
+                            count = evaluations.size,
+                            sum = evaluations.sum(),
+                            average = evaluations.average(),
+                            min = evaluations.minOrNull() ?: 0.0,
+                            max = evaluations.maxOrNull() ?: 0.0
+                        )
+                    }
+            }
+        println()
+        statsBySeason.forEach { (season, stats) ->
+            println("Season: $season => Count: ${stats.count}, Sum: ${stats.sum}, Average: ${"%.2f".format(stats.average)}, Min: ${stats.min}, Max: ${stats.max}")
+        }
     }
 
     private fun seasonsData(series: SeriesData): MutableList<SeasonData> {
@@ -105,9 +158,17 @@ class FilmsMain {
 
     private fun top5Episodes(episodes: List<EpisodeData>) =
         episodes.asSequence()
-            .filter { e -> e.evaluation.isNotEmpty() && !e.evaluation.equals("N/A", ignoreCase = true) }
+            .onEach { e -> println("Before filter: ${e.title}, evaluation: ${e.evaluation}") }
+            .filter { e ->
+                e.evaluation.isNotEmpty() && !e.evaluation.equals("N/A", ignoreCase = true)
+            }
+            .onEach { e -> println("After filter: ${e.title}, evaluation: ${e.evaluation}") }
             .sortedByDescending { it.evaluation }  // Ordenamos por evaluación de forma descendente
+            .onEach { e -> println("After sort: ${e.title}, evaluation: ${e.evaluation}") }
+            .map { e -> e.copy(title = e.title.uppercase()) }
+            .onEach { e -> println("After uppercase: ${e.title}, evaluation: ${e.evaluation}") }
             .take(5)
+            .onEach { e -> println("After take: ${e.title}, evaluation: ${e.evaluation}") }
             .forEachIndexed { i, e ->
                 println("${i + 1} -> ${e.title}, season: ${e.season}, evaluation: ${e.evaluation}")
             }
@@ -167,6 +228,26 @@ class FilmsMain {
         println()
         println("Desde que fecha deseas ver los episodios?: ")
         return readlnOrNull()?.toIntOrNull()
+    }
+
+    private fun searchEpisodesByTitle(episodes: MutableList<Episode>): Episode? {
+        var episodeTitle = getEntryEpisodeTitle()
+        while (episodeTitle.isNullOrEmpty()) {
+            println("Entrada no válida, intenta de nuevo")
+            episodeTitle = getEntryEpisodeTitle()
+        }
+
+        return episodes.asSequence()
+            //.filter { it.title.uppercase().contains(episodeTitle.uppercase()) }
+            .filter { it.title.contains(episodeTitle, ignoreCase = true) }
+            .firstOrNull()
+
+    }
+
+    private fun getEntryEpisodeTitle(): String?{
+        println()
+        println("Ingresa el titulo del episodio que desea sver: ")
+        return readlnOrNull()
     }
 
     /************************************** Fetch *********************************************/

@@ -51,7 +51,7 @@ class FilmsMain {
 
         // SeasonsData
         val seasonDataList: MutableList<SeasonData> = seasonsData(seriesData)
-         seasonDataList.forEach(::println)
+        // seasonDataList.forEach(::println)
 
         // EpisodesData
         // printEpisodesData(seasons = seasonDataList)
@@ -71,12 +71,22 @@ class FilmsMain {
         //searchEpisodesByReleaseDate(episodes)
 
         // Search episodes by title
-        val episode: Episode? = searchEpisodesByTitle(episodes)
-        episode?.let {
+        //val episode: Episode? = searchEpisodesByTitle(episodes)
+        /*episode?.let {
             println("****Episodio Encontrado****")
             println(episode)
             println("Episodio ${it.episodeNumber}: ${it.title}, season: ${it.season}")
-        } ?: println("Episodio no encontrado")
+        } ?: println("Episodio no encontrado")*/
+
+        // Evaluation By Season
+        val evaluationBySeason: Map<Int, Double> = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .groupBy { it.season } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason)  ->
+                episodesBySeason.map { it.evaluation }.average() // Calculamos el promedio de evaluación por temporada
+            }
+        evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
+
 
     }
 
@@ -202,7 +212,7 @@ class FilmsMain {
 
     private fun getEntryEpisodeTitle(): String?{
         println()
-        println("Ingresa el titulo del episdio que desea ver: ")
+        println("Ingresa el titulo del episodio que desea sver: ")
         return readlnOrNull()
     }
 

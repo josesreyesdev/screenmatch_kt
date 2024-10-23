@@ -1,9 +1,6 @@
 package com.jsrdev.screenmatch.main
 
-import com.jsrdev.screenmatch.model.Episode
-import com.jsrdev.screenmatch.model.EpisodeData
-import com.jsrdev.screenmatch.model.SeasonData
-import com.jsrdev.screenmatch.model.SeriesData
+import com.jsrdev.screenmatch.model.*
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
 import com.jsrdev.screenmatch.utils.Config
@@ -87,7 +84,44 @@ class FilmsMain {
             }
         evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
 
+        // General Statistics
+        val stats: Statistics = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .map { it.evaluation } // extraemos evaluaciones
+            .toList()
+            .let { evaluations ->
+                Statistics(
+                    count = evaluations.size,
+                    sum = evaluations.sum(),
+                    average = evaluations.average(),
+                    min = evaluations.minOrNull() ?: 0.0,
+                    max = evaluations.maxOrNull() ?: 0.0
+                )
+            }
+        println()
+        println("Count: ${stats.count}, Sum: ${stats.sum}, Average: ${"%.2f".format(stats.average)}, Min: ${stats.min}, Max: ${stats.max}")
 
+        // General Statistics By Season
+        val statsBySeason: Map<Int, Statistics> = episodes.asSequence()
+            .filter { it.evaluation > 0.0 }
+            .groupBy { it.season } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason)  ->
+                episodesBySeason.map { it.evaluation }
+                    .toList()
+                    .let { evaluations ->
+                        Statistics(
+                            count = evaluations.size,
+                            sum = evaluations.sum(),
+                            average = evaluations.average(),
+                            min = evaluations.minOrNull() ?: 0.0,
+                            max = evaluations.maxOrNull() ?: 0.0
+                        )
+                    }
+            }
+        println()
+        statsBySeason.forEach { (season, stats) ->
+            println("Season: $season => Count: ${stats.count}, Sum: ${stats.sum}, Average: ${"%.2f".format(stats.average)}, Min: ${stats.min}, Max: ${stats.max}")
+        }
     }
 
     private fun seasonsData(series: SeriesData): MutableList<SeasonData> {

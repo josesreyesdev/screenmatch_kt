@@ -1,5 +1,6 @@
 package com.jsrdev.screenmatch.main
 
+import com.jsrdev.screenmatch.mappers.SeriesMapper
 import com.jsrdev.screenmatch.model.*
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
@@ -22,10 +23,7 @@ class MenuMain(
             throw RuntimeException("${seriesData.title} is not a Series")
 
         seriesList.add(seriesData)
-
-        println(seriesData)
-        /*val seasonsData: MutableList<SeasonData> = getSeasonsData(seriesData)
-        printEpisodesData(seasonsData) */
+        showSearchedSeries()
 
         while (true) {
             var option = getEntryOption()
@@ -39,7 +37,7 @@ class MenuMain(
                     val season = getSeasonsData(seriesList[seriesList.size - 1])
                     printEpisodesData(season)
                 }
-                3 -> { seriesList.forEachIndexed { i, s -> println("${i + 1}.- $s") } }
+                3 -> showSearchedSeries()
                 4 -> {}
 
                 0 -> {
@@ -101,12 +99,22 @@ class MenuMain(
         seasons.forEachIndexed { i, s ->
             println("Episodes from season ${i + 1} of the ${s.title} series")
             s.episodeData.forEachIndexed { ind, e ->
-                println("   Episode ${ind + 1}: ${e.title}")
+                println("   Episode ${ind + 1}: ${e.title} --------- released: ${e.released}")
             }
             println()
         }
         //seasons.forEach { it.episodeData.forEach { println(it.title)} }
         println("******************************************************")
+    }
+
+    private fun showSearchedSeries() {
+        val series = seriesList.asSequence()
+            .map { SeriesMapper().mapToSeries(it) }
+            .toSet()
+            .sortedByDescending { it.genre }
+
+        series.forEachIndexed { i, s -> println("${i + 1}.- $s") }
+
     }
 
     /************************************** Fetch *********************************************/
@@ -131,14 +139,6 @@ class MenuMain(
         println()
         println("Escribe el nombre de la serie que deseas buscar: ")
         return readlnOrNull()
-    }
-
-    private fun getEpisodesData(seriesName: String, season: Int, episode: Int): EpisodeData {
-
-        val url = buildURL(seriesName, season, episode)
-        val json = apiService.fetchData(url = url)
-
-        return deserializeData.getData(json, EpisodeData::class.java)
     }
 
     private fun getSeasonData(seriesName: String, season: Int): SeasonData {

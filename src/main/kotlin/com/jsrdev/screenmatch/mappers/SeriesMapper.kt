@@ -6,12 +6,13 @@ import com.jsrdev.screenmatch.model.SeriesData
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.*
 
 class SeriesMapper {
 
     fun mapToSeries(seriesData: SeriesData): Series {
-        val year = seriesData.year.toIntOrNull() ?: 0
-        val genre = Genre.fromString(seriesData.genre.split(",")[0].trim())
+        val year = extractStartYear(seriesData.year)
+        val genre = parseGenres(seriesData.genre)
         val released = parseToDate(seriesData.released)
         val evaluation = seriesData.imdbRating.toDoubleOrNull() ?: 0.0
         val totalSeasons = seriesData.totalSeasons.toIntOrNull() ?: 0
@@ -41,9 +42,24 @@ class SeriesMapper {
 
     private fun parseToDate(dateStr: String): LocalDate {
         return try {
-            LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd MMM yyyy"))
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
+            LocalDate.parse(dateStr/*normalizedDateStr*/, formatter)
         } catch (e: DateTimeParseException) {
-            LocalDate.MIN // Usa un valor predeterminado si el formato no coincide
+            LocalDate.MIN // Valor predeterminado si el formato no coincide
         }
     }
+
+    private fun extractStartYear(yearStr: String): Int {
+        return yearStr.trim()
+            .split("–")
+            .firstOrNull()
+            ?.trim()
+            ?.toIntOrNull() ?: 0
+    }
+
+    private fun parseGenres(genreStr: String): Genre {
+        val firstGenre = genreStr.split(", ").firstOrNull()?.trim()
+        return firstGenre?.let { Genre.fromString(it) } ?: Genre.ACTION
+    }
+
 }

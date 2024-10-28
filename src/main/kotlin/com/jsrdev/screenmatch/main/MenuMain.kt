@@ -18,8 +18,8 @@ class MenuMain(
 
         val seriesData: SeriesData = getSeriesData()
 
-        if (seriesData.totalSeasons.isEmpty() || seriesData.totalSeasons.equals("N/A", ignoreCase = false))
-            throw RuntimeException("${seriesData.title} contains N/A or is empty in the field totalSeason")
+        if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
+            throw RuntimeException("${seriesData.title} is not a Series")
 
         seriesList.add(seriesData)
 
@@ -76,6 +76,9 @@ class MenuMain(
 
     private fun searchWebSeries() {
         val seriesData = getSeriesData()
+        if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
+            throw RuntimeException("${seriesData.title} is not a Series")
+
         seriesList.add(seriesData)
         println("$seriesData")
     }

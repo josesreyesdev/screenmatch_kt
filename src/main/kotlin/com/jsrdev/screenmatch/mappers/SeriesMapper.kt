@@ -3,6 +3,8 @@ package com.jsrdev.screenmatch.mappers
 import com.jsrdev.screenmatch.model.Genre
 import com.jsrdev.screenmatch.model.Series
 import com.jsrdev.screenmatch.model.SeriesData
+import com.jsrdev.screenmatch.service.OpenAIService
+import com.theokanning.openai.OpenAiHttpException
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -11,9 +13,11 @@ import java.util.*
 class SeriesMapper {
 
     fun mapToSeries(seriesData: SeriesData): Series {
+
         val year = extractStartYear(seriesData.year)
-        val genre = parseGenres(seriesData.genre)
         val released = parseToDate(seriesData.released)
+        val genre = parseGenres(seriesData.genre)
+        val synopsis = translateSynopsis(seriesData.plot)
         val evaluation = seriesData.imdbRating.toDoubleOrNull() ?: 0.0
         val totalSeasons = seriesData.totalSeasons.toIntOrNull() ?: 0
 
@@ -27,7 +31,7 @@ class SeriesMapper {
             director = seriesData.director,
             writer = seriesData.writer,
             actors = seriesData.actors,
-            synopsis = seriesData.plot,
+            synopsis = synopsis,
             language = seriesData.language,
             country = seriesData.country,
             awards = seriesData.awards,
@@ -62,4 +66,12 @@ class SeriesMapper {
         return firstGenre?.let { Genre.fromString(it) } ?: Genre.ACTION
     }
 
+    private fun translateSynopsis(plot: String): String {
+        return try {
+            OpenAIService.getTranslation(plot)
+        } catch (e: OpenAiHttpException) {
+            //println("Error al traducir la sinopsis: ${e.message}")
+            plot
+        }
+    }
 }

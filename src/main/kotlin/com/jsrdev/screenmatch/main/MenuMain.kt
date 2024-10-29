@@ -67,7 +67,7 @@ class MenuMain(
         """.trimIndent()
 
         println()
-        println("Escribe la opcion que deseas ver: ")
+        println("Escribe la opcion que deseas hacer: ")
         println(menu)
         return readln().toIntOrNull()
     }
@@ -152,7 +152,7 @@ class MenuMain(
         URLEncoder.encode(seriesName, StandardCharsets.UTF_8)
 
     private fun buildURL(seriesName: String, seasonNumber : Int?, episodeNumber: Int?): String {
-        val apiKey: String = Config.API_KEY
+        val apiKey: String = Config.API_KEY_OMDBAPI
         val urlBuilder: StringBuilder = StringBuilder("https://www.omdbapi.com/?t=")
 
         urlBuilder.append(seriesName).append("&apikey=").append(apiKey)

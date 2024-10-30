@@ -59,7 +59,7 @@ class SeriesMapper {
             .firstOrNull()
             ?.trim()
             ?.toIntOrNull() ?: 0
-    }
+}
 
     private fun parseGenres(genreStr: String): Genre {
         val firstGenre = genreStr.split(", ").firstOrNull()?.trim()

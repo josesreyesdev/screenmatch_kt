@@ -52,16 +52,21 @@ class MenuMain(
 
     private fun invalidEntry(): Int? {
         println()
-        println("Entrada no válida, intenta de nuevo")
+        println("Invalid entry, please, try again")
         return getEntryOption()
     }
 
     private fun getEntryOption(): Int? {
         val menu = """
             1.- Search New Web Series
-            2.- Show Episodes
+            2.- Search Episodes
             3.- Show Searched Series
-            4.- Show Episodes 2
+            4.- Search Series BY Title
+            5.- Top 5 Series
+            6.- Search Series By Genre
+            7.- Filter Series By season and evaluation
+            8.- Search Episodes By Name
+            9.- Top 5 Episodes by Series
             
             0.- Exit
         """.trimIndent()

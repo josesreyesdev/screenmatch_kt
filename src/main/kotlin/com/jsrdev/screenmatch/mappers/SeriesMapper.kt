@@ -22,6 +22,7 @@ class SeriesMapper {
         val totalSeasons = seriesData.totalSeasons.toIntOrNull() ?: 0
 
         return Series(
+            id = UUID.randomUUID(),
             title = seriesData.title,
             year = year,
             rated = seriesData.rated,

@@ -97,7 +97,7 @@ class MenuMain (
             val seriesTitle = encodedAndFormatSeriesName(series.title)
             val season: SeasonData = getSeasonData(seriesTitle, ind)
             seasons.add(season)
-        }series
+        }
 
         return seasons
     }

@@ -41,7 +41,8 @@ class SeriesMapper {
             votes = seriesData.imdbVotes,
             imdbID = seriesData.imdbID,
             type = seriesData.type,
-            totalSeasons = totalSeasons
+            totalSeasons = totalSeasons,
+            episodes = emptyList()
         )
     }
 

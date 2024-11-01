@@ -2,13 +2,16 @@ package com.jsrdev.screenmatch.main
 
 import com.jsrdev.screenmatch.mappers.SeriesMapper
 import com.jsrdev.screenmatch.model.*
+import com.jsrdev.screenmatch.repository.SeriesRepository
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
 import com.jsrdev.screenmatch.utils.Config
+import org.hibernate.exception.ConstraintViolationException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-class MenuMain(
+class MenuMain (
+    private val seriesRepository: SeriesRepository,
     private val apiService: GetFilmData = GetFilmData(),
     private val deserializeData: ConvertData = ConvertData()
 ) {
@@ -17,13 +20,7 @@ class MenuMain(
 
     fun showMenu() {
 
-        val seriesData: SeriesData = getSeriesData()
-
-        if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
-            throw RuntimeException("${seriesData.title} is not a Series")
-
-        seriesList.add(seriesData)
-        showSearchedSeries()
+        searchWebSeries()
 
         while (true) {
             var option = getEntryOption()
@@ -82,8 +79,15 @@ class MenuMain(
         if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
             throw RuntimeException("${seriesData.title} is not a Series")
 
-        seriesList.add(seriesData)
+        //seriesList.add(seriesData)
         println("$seriesData")
+
+        val series = SeriesMapper().mapToSeries(seriesData)
+        try {
+            seriesRepository.save(series)
+        } catch (ex: ConstraintViolationException) {
+            println("Serie ya esta en la db: ${ex.message}")
+        }
     }
 
     private fun getSeasonsData(series: SeriesData): MutableList<SeasonData> {
@@ -93,7 +97,7 @@ class MenuMain(
             val seriesTitle = encodedAndFormatSeriesName(series.title)
             val season: SeasonData = getSeasonData(seriesTitle, ind)
             seasons.add(season)
-        }
+        }series
 
         return seasons
     }
@@ -113,12 +117,16 @@ class MenuMain(
     }
 
     private fun showSearchedSeries() {
+        val seriesDB = seriesRepository.findAll()
         val series = seriesList.asSequence()
             .map { SeriesMapper().mapToSeries(it) }
             .toSet()
             .sortedByDescending { it.genre }
 
-        series.forEachIndexed { i, s -> println("${i + 1}.- $s") }
+        val newSeries = seriesDB.asSequence()
+            .sortedByDescending { it.genre }
+
+        newSeries.forEachIndexed { i, s -> println("${i + 1}.- $s") }
 
     }
 

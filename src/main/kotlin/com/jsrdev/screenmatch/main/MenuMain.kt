@@ -16,7 +16,7 @@ class MenuMain (
     private val deserializeData: ConvertData = ConvertData()
 ) {
 
-    private val seriesList: MutableList<SeriesData> = mutableListOf()
+    private val seriesList: MutableList<Series> = mutableListOf()
 
     fun showMenu() {
 
@@ -36,6 +36,11 @@ class MenuMain (
                 }
                 3 -> showSearchedSeries()
                 4 -> {}
+                5 -> {}
+                6 -> {}
+                7 -> {}
+                8 -> {}
+                9 -> {}
 
                 0 -> {
                     println("****** Ejecución Finalizada ******")
@@ -58,7 +63,7 @@ class MenuMain (
             1.- Search New Web Series
             2.- Search Episodes
             3.- Show Searched Series
-            4.- Search Series BY Title
+            4.- Search Series By Title
             5.- Top 5 Series
             6.- Search Series By Genre
             7.- Filter Series By season and evaluation
@@ -79,10 +84,10 @@ class MenuMain (
         if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
             throw RuntimeException("${seriesData.title} is not a Series")
 
-        //seriesList.add(seriesData)
-        println("$seriesData")
-
         val series = SeriesMapper().mapToSeries(seriesData)
+        seriesList.add(series)
+        println(series)
+
         try {
             seriesRepository.save(series)
         } catch (ex: ConstraintViolationException) {
@@ -90,10 +95,10 @@ class MenuMain (
         }
     }
 
-    private fun getSeasonsData(series: SeriesData): MutableList<SeasonData> {
+    private fun getSeasonsData(series: Series): MutableList<SeasonData> {
         val seasons = mutableListOf<SeasonData>()
 
-        for (ind: Int in 1..series.totalSeasons.toInt()) {
+        for (ind: Int in 1..series.totalSeasons) {
             val seriesTitle = encodedAndFormatSeriesName(series.title)
             val season: SeasonData = getSeasonData(seriesTitle, ind)
             seasons.add(season)
@@ -117,16 +122,12 @@ class MenuMain (
     }
 
     private fun showSearchedSeries() {
-        val seriesDB = seriesRepository.findAll()
-        val series = seriesList.asSequence()
-            .map { SeriesMapper().mapToSeries(it) }
-            .toSet()
+        val seriesInDB = seriesRepository.findAll()
+
+        val series = seriesInDB.asSequence()
             .sortedByDescending { it.genre }
 
-        val newSeries = seriesDB.asSequence()
-            .sortedByDescending { it.genre }
-
-        newSeries.forEachIndexed { i, s -> println("${i + 1}.- $s") }
+        series.forEachIndexed { i, s -> println("${i + 1}.- $s") }
 
     }
 

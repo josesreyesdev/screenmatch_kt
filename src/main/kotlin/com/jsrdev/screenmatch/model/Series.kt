@@ -32,6 +32,6 @@ data class Series(
     val type: String,
     @Column(name = "total_seasons")
     val totalSeasons: Int,
-    @Transient
-    val episodes: List<Episode>
+    @OneToMany(mappedBy = "seriesId")
+    val episodes: List<Episode> = emptyList(),
 )

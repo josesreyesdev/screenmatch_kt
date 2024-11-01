@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.util.*
 
 class FilmsMain {
 
@@ -79,7 +80,7 @@ class FilmsMain {
         val evaluationBySeason: Map<Int, Double> = episodes.asSequence()
             .filter { it.evaluation > 0.0 }
             .groupBy { it.season } // agrupamos los episodios por temporada
-            .mapValues { (_, episodesBySeason)  ->
+            .mapValues { (_, episodesBySeason) ->
                 episodesBySeason.map { it.evaluation }.average() // Calculamos el promedio de evaluación por temporada
             }
         evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
@@ -105,7 +106,7 @@ class FilmsMain {
         val statsBySeason: Map<Int, Statistics> = episodes.asSequence()
             .filter { it.evaluation > 0.0 }
             .groupBy { it.season } // agrupamos los episodios por temporada
-            .mapValues { (_, episodesBySeason)  ->
+            .mapValues { (_, episodesBySeason) ->
                 episodesBySeason.map { it.evaluation }
                     .toList()
                     .let { evaluations ->
@@ -182,22 +183,24 @@ class FilmsMain {
                 s.episodeData.asSequence()
                     .map { e ->
                         Episode(
+                            id = UUID.randomUUID(),
                             title = e.title.ifBlank { "Unknown Title" },
                             season = s.season.toIntOrNull() ?: 0,
                             episodeNumber = e.episode.toIntOrNull() ?: 0,
                             evaluation = e.evaluation.toDoubleOrNull() ?: 0.0,
-                            releaseDate = parseReleaseDate(e.released, formatter)
+                            releaseDate = parseReleaseDate(e.released, formatter),
+                            seriesId = UUID.randomUUID() /*Ficticio*/
                         )
                     }
             }
             .toMutableList()
     }
 
-    private fun parseReleaseDate(released: String, formatter: DateTimeFormatter): LocalDate? {
+    private fun parseReleaseDate(released: String, formatter: DateTimeFormatter): LocalDate {
         return try {
             LocalDate.parse(released, formatter)
         } catch (e: DateTimeParseException) {
-            null
+            LocalDate.MIN
         }
     }
 
@@ -214,17 +217,18 @@ class FilmsMain {
 
         episodes.asSequence()
             //.filter { it.releaseDate?.isAfter(searchByDate) == true}
-            .filter { it.releaseDate != null && it.releaseDate.isAfter(searchByDate)}
-            .forEachIndexed {i, e ->
+            .filter { it.releaseDate != null && it.releaseDate.isAfter(searchByDate) }
+            .forEachIndexed { i, e ->
                 println(
                     "${i + 1} -> Season: ${e.season}, " +
                             "Episode: ${e.episodeNumber}.- ${e.title}, " +
-                            "Released: ${e.releaseDate?.format(dtf)}")
+                            "Released: ${e.releaseDate?.format(dtf)}"
+                )
             }
 
     }
 
-    private fun getEntryDate(): Int?{
+    private fun getEntryDate(): Int? {
         println()
         println("Desde que fecha deseas ver los episodios?: ")
         return readlnOrNull()?.toIntOrNull()
@@ -244,7 +248,7 @@ class FilmsMain {
 
     }
 
-    private fun getEntryEpisodeTitle(): String?{
+    private fun getEntryEpisodeTitle(): String? {
         println()
         println("Ingresa el titulo del episodio que desea sver: ")
         return readlnOrNull()

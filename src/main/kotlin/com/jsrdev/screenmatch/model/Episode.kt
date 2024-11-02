@@ -16,6 +16,7 @@ data class Episode(
     val evaluation: Double,
     @Column(name = "release_date")
     val releaseDate: LocalDate,
-    @Column(name = "series_id", nullable = false)
-    val seriesId: UUID
+    //@Column(name = "series_id", nullable = false)
+    @ManyToOne
+    val seriesId: Series
 )

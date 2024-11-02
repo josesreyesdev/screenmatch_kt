@@ -32,6 +32,14 @@ data class Series(
     val type: String,
     @Column(name = "total_seasons")
     val totalSeasons: Int,
-    @Transient
-    val episodes: List<Episode>
-)
+    @OneToMany(mappedBy = "series", cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
+    val episodes: MutableList<Episode> = mutableListOf(),
+) {
+    override fun toString(): String {
+        return "Series(id=$id, title='$title', year=$year, rated='$rated', released=$released, " +
+                "runtime='$runtime', genre=$genre, director='$director', writer='$writer', " +
+                "actors='$actors', synopsis='$synopsis', language='$language', country='$country', " +
+                "awards='$awards', poster='$poster', evaluation=$evaluation, votes='$votes', " +
+                "imdbID='$imdbID', type='$type', totalSeasons=$totalSeasons, episodes=$episodes)"
+    }
+}

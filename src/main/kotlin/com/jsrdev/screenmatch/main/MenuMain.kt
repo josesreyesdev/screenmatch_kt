@@ -1,5 +1,6 @@
 package com.jsrdev.screenmatch.main
 
+import com.jsrdev.screenmatch.mappers.EpisodeMapper
 import com.jsrdev.screenmatch.mappers.SeriesMapper
 import com.jsrdev.screenmatch.model.*
 import com.jsrdev.screenmatch.repository.SeriesRepository
@@ -16,12 +17,9 @@ class MenuMain (
     private val deserializeData: ConvertData = ConvertData()
 ) {
 
-    private val seriesList: MutableList<Series> = mutableListOf()
+    private var series: MutableList<Series> = mutableListOf()
 
     fun showMenu() {
-
-        searchWebSeries()
-
         while (true) {
             var option = getEntryOption()
             while (option == null) {
@@ -30,10 +28,7 @@ class MenuMain (
 
             when (option) {
                 1 -> searchWebSeries()
-                2 -> {
-                    val season = getSeasonsData(seriesList[seriesList.size - 1])
-                    printEpisodesData(season)
-                }
+                2 -> searchEpisodes()
                 3 -> showSearchedSeries()
                 4 -> {}
                 5 -> {}
@@ -66,26 +61,26 @@ class MenuMain (
             4.- Search Series By Title
             5.- Top 5 Series
             6.- Search Series By Genre
-            7.- Filter Series By season and evaluation
+            7.- Filter Series By season And Evaluation
             8.- Search Episodes By Name
-            9.- Top 5 Episodes by Series
+            9.- Top 5 Episodes By Series
             
             0.- Exit
         """.trimIndent()
 
         println()
-        println("Escribe la opcion que deseas hacer: ")
+        println("Write option: ")
         println(menu)
         return readln().toIntOrNull()
     }
 
     private fun searchWebSeries() {
         val seriesData = getSeriesData()
+        println(seriesData)
         if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
-            throw RuntimeException("${seriesData.title} is not a Series")
+            throw RuntimeException("${seriesData.title}, not found or maybe is not a Series")
 
         val series = SeriesMapper().mapToSeries(seriesData)
-        seriesList.add(series)
         println(series)
 
         try {
@@ -93,6 +88,49 @@ class MenuMain (
         } catch (ex: ConstraintViolationException) {
             println("Serie ya esta en la db: ${ex.message}")
         }
+    }
+
+    private fun searchEpisodes() {
+        showSearchedSeries()
+
+        var inputSeriesName = inputSeriesName()
+
+        while (inputSeriesName.isNullOrEmpty()) {
+            println("Invalid entry, please, try again")
+            inputSeriesName = inputSeriesName()
+        }
+        inputSeriesName = inputSeriesName.trim()
+
+        val seriesInDB: Series? = series.asSequence()
+            .filter { it.title.contains(inputSeriesName, ignoreCase = true) }
+            .firstOrNull()
+
+        seriesInDB?.let { series ->
+            val seasons: MutableList<SeasonData> = getSeasonsData(series)
+            val episodeList: MutableList<Episode> = seasons.asSequence()
+                .flatMap { season -> season.episodeData.asSequence()
+                    .map { episode -> EpisodeMapper().mapToEpisode(series, season.season, episode) }
+                }
+                .toMutableList()
+
+            if (series.episodes.isEmpty()) {
+                val updatedSeries = series.copy(episodes = episodeList)
+                seriesRepository.save(updatedSeries)
+            }
+        } ?: println("$inputSeriesName, Not found")
+    }
+
+    private fun inputSeriesName(): String? {
+        println("\nEnter the series name to view its episodes: ")
+        return readlnOrNull()
+    }
+
+    private fun showSearchedSeries() {
+        series = seriesRepository.findAll()
+
+        series.asSequence()
+            .sortedByDescending { it.genre }
+            .forEachIndexed{ i, s -> println("${i + 1}.- $s") }
     }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {
@@ -110,8 +148,8 @@ class MenuMain (
     private fun printEpisodesData(seasons: List<SeasonData>) {
         // Show episode title for season
         println("************** Series: ${seasons[0].title} ***************")
-        seasons.forEachIndexed { i, s ->
-            println("Episodes from season ${i + 1} of the ${s.title} series")
+        seasons.forEach { s ->
+            println("Episodes from season ${s.season} of the ${s.title} series")
             s.episodeData.forEachIndexed { ind, e ->
                 println("   Episode ${ind + 1}: ${e.title} --------- released: ${e.released}")
             }
@@ -121,22 +159,12 @@ class MenuMain (
         println("******************************************************")
     }
 
-    private fun showSearchedSeries() {
-        val seriesInDB = seriesRepository.findAll()
-
-        val series = seriesInDB.asSequence()
-            .sortedByDescending { it.genre }
-
-        series.forEachIndexed { i, s -> println("${i + 1}.- $s") }
-
-    }
-
     /************************************** Fetch *********************************************/
     private fun getSeriesData(): SeriesData {
 
         var inputSeriesName = getSeriesName()
         while (inputSeriesName.isNullOrEmpty()) {
-            println("Entrada no válida, intenta de nuevo")
+            println("Invalid entry, please, try again")
             inputSeriesName = getSeriesName()
         }
         inputSeriesName = inputSeriesName.trim().lowercase()
@@ -151,7 +179,7 @@ class MenuMain (
 
     private fun getSeriesName(): String? {
         println()
-        println("Escribe el nombre de la serie que deseas buscar: ")
+        println("Enter series name: ")
         return readlnOrNull()
     }
 

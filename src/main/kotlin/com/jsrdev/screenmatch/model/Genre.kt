@@ -7,18 +7,18 @@ enum class Genre(val genreOmdb: String, val genreEsp: String) {
     ROMANCE("Romance", "Romance"),
     COMEDY("Comedy", "Comedia"),
     DRAMA("Drama", "Drama"),
-    CRIME("Crime", "Crimen");
+    CRIME("Crime", "Crimen"),
+    SHORT("Short", "Corto"),
+    HORROR("Horror", "Horror");
 
     companion object {
-        fun fromString(text: String): Genre {
+        fun fromString(text: String): Genre? {
             return entries.find { it.genreOmdb.equals(text, ignoreCase = true) }
-                ?: throw IllegalArgumentException("No genre found: $text")
         }
 
-        fun fromEsp(text: String): Genre {
+        fun fromEsp(text: String): Genre? {
             val normalizedText = text.normalize()
             return entries.find { it.genreEsp.normalize().equals(normalizedText, ignoreCase = true) }
-                ?: throw IllegalArgumentException("No genre found: $text")
         }
 
         // Función para normalizar el texto eliminando tildes

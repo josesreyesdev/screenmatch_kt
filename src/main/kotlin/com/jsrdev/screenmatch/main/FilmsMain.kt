@@ -61,7 +61,7 @@ class FilmsMain {
         // top5Episodes(episodes = episodeDataList)
 
         // Episode
-        val episodes: MutableList<Episode> = episode(seasonDataList)
+        val episodes: MutableList<EpisodeData> = episode(seasonDataList)
         //episodes.forEach(::println)
 
         // Search episodes by release date
@@ -77,17 +77,18 @@ class FilmsMain {
 
         // Evaluation By Season
         val evaluationBySeason: Map<Int, Double> = episodes.asSequence()
-            .filter { it.evaluation > 0.0 }
-            .groupBy { it.season } // agrupamos los episodios por temporada
-            .mapValues { (_, episodesBySeason)  ->
-                episodesBySeason.map { it.evaluation }.average() // Calculamos el promedio de evaluación por temporada
+            .filter { (it.evaluation.toDoubleOrNull() ?: 0.0) > 0.0 }
+            .groupBy { it.season.toInt() } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason) ->
+                episodesBySeason.map { it.evaluation.toInt() }
+                    .average() // Calculamos el promedio de evaluación por temporada
             }
         evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
 
         // General Statistics
         val stats: Statistics = episodes.asSequence()
-            .filter { it.evaluation > 0.0 }
-            .map { it.evaluation } // extraemos evaluaciones
+            .filter { (it.evaluation.toDoubleOrNull() ?: 0.0) > 0.0 }
+            .map { it.evaluation.toDoubleOrNull() ?: 0.0 } // extraemos evaluaciones
             .toList()
             .let { evaluations ->
                 Statistics(
@@ -103,10 +104,10 @@ class FilmsMain {
 
         // General Statistics By Season
         val statsBySeason: Map<Int, Statistics> = episodes.asSequence()
-            .filter { it.evaluation > 0.0 }
-            .groupBy { it.season } // agrupamos los episodios por temporada
-            .mapValues { (_, episodesBySeason)  ->
-                episodesBySeason.map { it.evaluation }
+            .filter { (it.evaluation.toDoubleOrNull() ?: 0.0) > 0.0 }
+            .groupBy { it.season.toIntOrNull() ?: 0 } // agrupamos los episodios por temporada
+            .mapValues { (_, episodesBySeason) ->
+                episodesBySeason.map { it.evaluation.toDoubleOrNull() ?: 0.0 }
                     .toList()
                     .let { evaluations ->
                         Statistics(
@@ -173,31 +174,48 @@ class FilmsMain {
                 println("${i + 1} -> ${e.title}, season: ${e.season}, evaluation: ${e.evaluation}")
             }
 
-    private fun episode(seasons: List<SeasonData>): MutableList<Episode> {
+    private fun episode(seasons: List<SeasonData>): MutableList<EpisodeData> {
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
         return seasons.asSequence()
-            .flatMap { s ->
-                s.episodeData.asSequence()
-                    .map { e ->
-                        Episode(
-                            title = e.title.ifBlank { "Unknown Title" },
-                            season = s.season.toIntOrNull() ?: 0,
-                            episodeNumber = e.episode.toIntOrNull() ?: 0,
-                            evaluation = e.evaluation.toDoubleOrNull() ?: 0.0,
-                            releaseDate = parseReleaseDate(e.released, formatter)
-                        )
-                    }
+            .flatMap { it.episodeData.asSequence() }
+            .map { e ->
+                EpisodeData(
+                    title = e.title,
+                    year = e.year,
+                    rated = e.rated,
+                    released = e.released,
+                    season = e.season,
+                    episode = e.episode,
+                    runtime = e.runtime,
+                    genre = e.genre,
+                    director = e.director,
+                    writer = e.writer,
+                    actors = e.actors,
+                    plot = e.plot,
+                    language = e.language,
+                    country = e.country,
+                    awards = e.awards,
+                    poster = e.poster,
+                    ratingData = e.ratingData,
+                    metascore = e.metascore,
+                    evaluation = e.evaluation,
+                    imdbVotes = e.imdbVotes,
+                    imdbID = e.imdbID,
+                    seriesID = e.seriesID,
+                    type = e.type,
+                    response = e.response
+                )
             }
             .toMutableList()
     }
 
-    private fun parseReleaseDate(released: String, formatter: DateTimeFormatter): LocalDate? {
+    private fun parseReleaseDate(released: String, formatter: DateTimeFormatter): LocalDate {
         return try {
             LocalDate.parse(released, formatter)
         } catch (e: DateTimeParseException) {
-            null
+            LocalDate.MIN
         }
     }
 
@@ -213,18 +231,18 @@ class FilmsMain {
         val dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
         episodes.asSequence()
-            //.filter { it.releaseDate?.isAfter(searchByDate) == true}
-            .filter { it.releaseDate != null && it.releaseDate.isAfter(searchByDate)}
-            .forEachIndexed {i, e ->
+            .filter { it.releaseDate?.isAfter(searchByDate) == true}
+            .forEachIndexed { i, e ->
                 println(
                     "${i + 1} -> Season: ${e.season}, " +
                             "Episode: ${e.episodeNumber}.- ${e.title}, " +
-                            "Released: ${e.releaseDate?.format(dtf)}")
+                            "Released: ${e.releaseDate?.format(dtf)}"
+                )
             }
 
     }
 
-    private fun getEntryDate(): Int?{
+    private fun getEntryDate(): Int? {
         println()
         println("Desde que fecha deseas ver los episodios?: ")
         return readlnOrNull()?.toIntOrNull()
@@ -244,7 +262,7 @@ class FilmsMain {
 
     }
 
-    private fun getEntryEpisodeTitle(): String?{
+    private fun getEntryEpisodeTitle(): String? {
         println()
         println("Ingresa el titulo del episodio que desea sver: ")
         return readlnOrNull()

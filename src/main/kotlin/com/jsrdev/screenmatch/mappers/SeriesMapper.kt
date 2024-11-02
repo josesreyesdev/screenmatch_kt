@@ -42,7 +42,7 @@ class SeriesMapper {
             imdbID = seriesData.imdbID,
             type = seriesData.type,
             totalSeasons = totalSeasons,
-            episodes = emptyList()
+            episodes = mutableListOf()
         )
     }
 
@@ -64,8 +64,16 @@ class SeriesMapper {
 }
 
     private fun parseGenres(genreStr: String): Genre {
-        val firstGenre = genreStr.split(", ").firstOrNull()?.trim()
-        return firstGenre?.let { Genre.fromString(it) } ?: Genre.ACTION
+        val genres = genreStr.split(", ").map { it.trim() }
+
+        val foundGenreFromString = genres.firstNotNullOfOrNull { Genre.fromString(it) }
+        val foundGenreFromEsp = genres.firstNotNullOfOrNull { Genre.fromEsp(it) }
+
+        return foundGenreFromString ?: foundGenreFromEsp ?: throw IllegalArgumentException("No valid genre found: $genreStr")
+
+        /*genres.firstNotNullOfOrNull {
+            Genre.fromString(it) ?: Genre.fromEsp(it)
+        } ?: throw IllegalArgumentException("No valid genre found: $genreStr") */
     }
 
     private fun translateSynopsis(plot: String): String {

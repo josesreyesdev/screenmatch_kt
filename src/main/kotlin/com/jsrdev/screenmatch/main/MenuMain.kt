@@ -10,7 +10,6 @@ import com.jsrdev.screenmatch.utils.Config
 import org.hibernate.exception.ConstraintViolationException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import kotlin.jvm.optionals.asSequence
 
 class MenuMain (
     private val seriesRepository: SeriesRepository,
@@ -107,14 +106,12 @@ class MenuMain (
             .firstOrNull()
 
         seriesInDB?.let { series ->
-            val seasons = getSeasonsData(series)
+            val seasons: MutableList<SeasonData> = getSeasonsData(series)
             val episodeList: MutableList<Episode> = seasons.asSequence()
                 .flatMap { season -> season.episodeData.asSequence()
                     .map { episode -> EpisodeMapper().mapToEpisode(series, season.season, episode) }
                 }
                 .toMutableList()
-
-            printEpisodesData(seasons)
 
             if (series.episodes.isEmpty()) {
                 val updatedSeries = series.copy(episodes = episodeList)

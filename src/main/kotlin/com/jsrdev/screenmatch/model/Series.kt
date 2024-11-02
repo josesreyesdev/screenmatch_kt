@@ -40,6 +40,6 @@ data class Series(
                 "runtime='$runtime', genre=$genre, director='$director', writer='$writer', " +
                 "actors='$actors', synopsis='$synopsis', language='$language', country='$country', " +
                 "awards='$awards', poster='$poster', evaluation=$evaluation, votes='$votes', " +
-                "imdbID='$imdbID', type='$type', totalSeasons=$totalSeasons)"
+                "imdbID='$imdbID', type='$type', totalSeasons=$totalSeasons, episodes=$episodes)"
     }
 }

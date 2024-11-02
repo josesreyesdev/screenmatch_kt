@@ -7,7 +7,9 @@ enum class Genre(val genreOmdb: String, val genreEsp: String) {
     ROMANCE("Romance", "Romance"),
     COMEDY("Comedy", "Comedia"),
     DRAMA("Drama", "Drama"),
-    CRIME("Crime", "Crimen");
+    CRIME("Crime", "Crimen"),
+    SHORT("Short", "Corto"),
+    HORROR("Horror", "Horror");
 
     companion object {
         fun fromString(text: String): Genre {

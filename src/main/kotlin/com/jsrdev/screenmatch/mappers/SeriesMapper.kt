@@ -42,7 +42,7 @@ class SeriesMapper {
             imdbID = seriesData.imdbID,
             type = seriesData.type,
             totalSeasons = totalSeasons,
-            episodes = emptyList()
+            episodes = mutableListOf()
         )
     }
 

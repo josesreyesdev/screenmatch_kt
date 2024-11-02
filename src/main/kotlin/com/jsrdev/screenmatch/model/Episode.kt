@@ -15,8 +15,13 @@ data class Episode(
     val episodeNumber: Int,
     val evaluation: Double,
     @Column(name = "release_date")
-    val releaseDate: LocalDate,
+    val releaseDate: LocalDate?,
     //@Column(name = "series_id", nullable = false)
     @ManyToOne
-    val seriesId: Series
-)
+    val series: Series
+) {
+    override fun toString(): String {
+        return "Episode(id=$id, title='$title', season=$season, episodeNumber=$episodeNumber, " +
+                "evaluation=$evaluation, releaseDate=$releaseDate, seriesId='${series.id}')"
+    }
+}

@@ -231,13 +231,12 @@ class FilmsMain {
         val dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
         episodes.asSequence()
-            //.filter { it.releaseDate?.isAfter(searchByDate) == true}
-            .filter { it.releaseDate.isAfter(searchByDate) }
+            .filter { it.releaseDate?.isAfter(searchByDate) == true}
             .forEachIndexed { i, e ->
                 println(
                     "${i + 1} -> Season: ${e.season}, " +
                             "Episode: ${e.episodeNumber}.- ${e.title}, " +
-                            "Released: ${e.releaseDate.format(dtf)}"
+                            "Released: ${e.releaseDate?.format(dtf)}"
                 )
             }
 

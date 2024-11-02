@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.*
 
 class FilmsMain {
 
@@ -81,7 +80,8 @@ class FilmsMain {
             .filter { (it.evaluation.toDoubleOrNull() ?: 0.0) > 0.0 }
             .groupBy { it.season.toInt() } // agrupamos los episodios por temporada
             .mapValues { (_, episodesBySeason) ->
-                episodesBySeason.map { it.evaluation.toInt() }.average() // Calculamos el promedio de evaluación por temporada
+                episodesBySeason.map { it.evaluation.toInt() }
+                    .average() // Calculamos el promedio de evaluación por temporada
             }
         evaluationBySeason.forEach { println("Season: ${it.key}, Evaluation: %.2f".format(it.value)) }
 
@@ -179,44 +179,34 @@ class FilmsMain {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
         return seasons.asSequence()
-            .flatMap { s ->
-                s.episodeData.asSequence()
-                    .map { e -> EpisodeData(
-                        title = TODO(),
-                        year = TODO(),
-                        rated = TODO(),
-                        released = TODO(),
-                        season = TODO(),
-                        episode = TODO(),
-                        runtime = TODO(),
-                        genre = TODO(),
-                        director = TODO(),
-                        writer = TODO(),
-                        actors = TODO(),
-                        plot = TODO(),
-                        language = TODO(),
-                        country = TODO(),
-                        awards = TODO(),
-                        poster = TODO(),
-                        ratingData = TODO(),
-                        metascore = TODO(),
-                        evaluation = TODO(),
-                        imdbVotes = TODO(),
-                        imdbID = TODO(),
-                        seriesID = TODO(),
-                        type = TODO(),
-                        response = TODO()
-                    )
-                        /*Episode(
-                            id = UUID.randomUUID(),
-                            title = e.title.ifBlank { "Unknown Title" },
-                            season = s.season.toIntOrNull() ?: 0,
-                            episodeNumber = e.episode.toIntOrNull() ?: 0,
-                            evaluation = e.evaluation.toDoubleOrNull() ?: 0.0,
-                            releaseDate = parseReleaseDate(e.released, formatter),
-                            seriesId = UUID.randomUUID()
-                        ) */
-                    }
+            .flatMap { it.episodeData.asSequence() }
+            .map { e ->
+                EpisodeData(
+                    title = e.title,
+                    year = e.year,
+                    rated = e.rated,
+                    released = e.released,
+                    season = e.season,
+                    episode = e.episode,
+                    runtime = e.runtime,
+                    genre = e.genre,
+                    director = e.director,
+                    writer = e.writer,
+                    actors = e.actors,
+                    plot = e.plot,
+                    language = e.language,
+                    country = e.country,
+                    awards = e.awards,
+                    poster = e.poster,
+                    ratingData = e.ratingData,
+                    metascore = e.metascore,
+                    evaluation = e.evaluation,
+                    imdbVotes = e.imdbVotes,
+                    imdbID = e.imdbID,
+                    seriesID = e.seriesID,
+                    type = e.type,
+                    response = e.response
+                )
             }
             .toMutableList()
     }
@@ -242,12 +232,12 @@ class FilmsMain {
 
         episodes.asSequence()
             //.filter { it.releaseDate?.isAfter(searchByDate) == true}
-            .filter { it.releaseDate != null && it.releaseDate.isAfter(searchByDate) }
+            .filter { it.releaseDate.isAfter(searchByDate) }
             .forEachIndexed { i, e ->
                 println(
                     "${i + 1} -> Season: ${e.season}, " +
                             "Episode: ${e.episodeNumber}.- ${e.title}, " +
-                            "Released: ${e.releaseDate?.format(dtf)}"
+                            "Released: ${e.releaseDate.format(dtf)}"
                 )
             }
 

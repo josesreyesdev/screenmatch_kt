@@ -4,4 +4,7 @@ import com.jsrdev.screenmatch.model.Series
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface SeriesRepository : JpaRepository<Series, UUID>
+interface SeriesRepository : JpaRepository<Series, UUID> {
+
+    fun findByTitleContainsIgnoreCase(title: String): Series?
+}

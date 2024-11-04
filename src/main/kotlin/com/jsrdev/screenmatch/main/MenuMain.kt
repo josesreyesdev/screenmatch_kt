@@ -30,7 +30,7 @@ class MenuMain (
                 1 -> searchWebSeries()
                 2 -> searchEpisodes()
                 3 -> showSearchedSeries()
-                4 -> {}
+                4 -> searchSeriesByTitle()
                 5 -> {}
                 6 -> {}
                 7 -> {}
@@ -116,6 +116,8 @@ class MenuMain (
             if (series.episodes.isEmpty()) {
                 val updatedSeries = series.copy(episodes = episodeList)
                 seriesRepository.save(updatedSeries)
+
+                printEpisodesData(seasons)
             }
         } ?: println("$inputSeriesName, Not found")
     }
@@ -131,6 +133,22 @@ class MenuMain (
         series.asSequence()
             .sortedByDescending { it.genre }
             .forEachIndexed{ i, s -> println("${i + 1}.- $s") }
+    }
+
+    private fun searchSeriesByTitle() {
+        var title = inputSeriesName()
+        while (title.isNullOrEmpty()) {
+            println("Invalid entry, please, try again")
+            title = inputSeriesName()
+        }
+        title = title.trim()
+
+        val searchedSeries = seriesRepository.findByTitleContainsIgnoreCase(title)
+
+        searchedSeries?.let {
+            println("Series found: ")
+            println(searchedSeries)
+        } ?: println("Not found with: $title")
     }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {

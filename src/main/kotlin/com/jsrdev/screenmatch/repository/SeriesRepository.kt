@@ -7,4 +7,5 @@ import java.util.*
 interface SeriesRepository : JpaRepository<Series, UUID> {
 
     fun findByTitleContainsIgnoreCase(title: String): Series?
+    fun findTop5ByOrderByEvaluationDesc(): List<Series>
 }

@@ -31,7 +31,7 @@ class MenuMain (
                 2 -> searchEpisodes()
                 3 -> showSearchedSeries()
                 4 -> searchSeriesByTitle()
-                5 -> {}
+                5 -> searchTop5Series()
                 6 -> {}
                 7 -> {}
                 8 -> {}
@@ -136,10 +136,10 @@ class MenuMain (
     }
 
     private fun searchSeriesByTitle() {
-        var title = inputSeriesName()
+        var title = inputSeriesByTitle()
         while (title.isNullOrEmpty()) {
             println("Invalid entry, please, try again")
-            title = inputSeriesName()
+            title = inputSeriesByTitle()
         }
         title = title.trim()
 
@@ -149,6 +149,19 @@ class MenuMain (
             println("Series found: ")
             println(searchedSeries)
         } ?: println("Not found with: $title")
+    }
+
+    private fun inputSeriesByTitle(): String? {
+        println("\nEnter the series title: ")
+        return readlnOrNull()
+    }
+
+    private fun searchTop5Series() {
+        val top5Series: List<Series> = seriesRepository.findTop5ByOrderByEvaluationDesc()
+
+        top5Series.forEachIndexed { i, s ->
+            println("${i+1}.- Series: ${s.title}, evaluation: ${s.evaluation}")
+        }
     }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {

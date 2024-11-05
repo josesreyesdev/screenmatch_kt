@@ -10,4 +10,5 @@ interface SeriesRepository : JpaRepository<Series, UUID> {
     fun findByTitleContainsIgnoreCase(title: String): Series?
     fun findTop5ByOrderByEvaluationDesc(): List<Series>
     fun findByGenre(genre: Genre): List<Series>
+    fun findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason: Int, evaluation: Double): List<Series>
 }

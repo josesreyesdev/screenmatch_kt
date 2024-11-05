@@ -33,7 +33,7 @@ class MenuMain (
                 4 -> searchSeriesByTitle()
                 5 -> searchTop5Series()
                 6 -> searchByGenreSeries()
-                7 -> {}
+                7 -> filterSeriesBySeasonAndEvaluation()
                 8 -> {}
                 9 -> {}
 
@@ -61,7 +61,7 @@ class MenuMain (
             4.- Search Series By Title
             5.- Top 5 Series
             6.- Search Series By Genre
-            7.- Filter Series By season And Evaluation
+            7.- Filter Series By Season And Evaluation
             8.- Search Episodes By Name
             9.- Top 5 Episodes By Series
             
@@ -188,6 +188,42 @@ class MenuMain (
     private fun parseGenres(genre: String): Genre =
         Genre.fromEsp(genre) ?: Genre.fromString(genre)
         ?: throw IllegalArgumentException("No valid genre found: $genre")
+
+    private fun filterSeriesBySeasonAndEvaluation() {
+        var totalSeason = entrySeason()
+        while (totalSeason == null) {
+            println("Invalid entry, please try again")
+            totalSeason = entrySeason()
+        }
+
+        var evaluation = entryEvaluation()
+        while (evaluation == null) {
+            println("Invalid entry, please try again")
+            evaluation = entryEvaluation()
+        }
+
+        val seriesBySeasonAndEvaluation = seriesRepository
+            .findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason, evaluation)
+
+        if (seriesBySeasonAndEvaluation.isNotEmpty())
+            seriesBySeasonAndEvaluation.forEachIndexed { i, s ->
+                println("${i+1}.- ${s.title} - evaluation: ${s.evaluation}, total season: ${s.totalSeasons}, genre: ${s.genre}")
+            }
+        else
+            println("Not found series")
+    }
+
+    private fun entrySeason(): Int? {
+        println()
+        println("Filter series with how many seasons")
+        return readlnOrNull()?.toIntOrNull()
+    }
+
+    private fun entryEvaluation(): Double? {
+        println()
+        println("With evaluation, starting from which value")
+        return readlnOrNull()?.toDoubleOrNull()
+    }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {
         val seasons = mutableListOf<SeasonData>()

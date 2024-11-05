@@ -18,6 +18,7 @@ class MenuMain (
 ) {
 
     private var series: MutableList<Series> = mutableListOf()
+    private var searchedSeries: Series? = null
 
     fun showMenu() {
         while (true) {
@@ -34,8 +35,8 @@ class MenuMain (
                 5 -> searchTop5Series()
                 6 -> searchByGenreSeries()
                 7 -> filterSeriesBySeasonAndEvaluation()
-                8 -> {}
-                9 -> {}
+                8 -> searchEpisodeByTitle()
+                9 -> searchTop5EpisodesBySeries()
 
                 0 -> {
                     println("****** Ejecución Finalizada ******")
@@ -62,14 +63,14 @@ class MenuMain (
             5.- Top 5 Series
             6.- Search Series By Genre
             7.- Filter Series By Season And Evaluation
-            8.- Search Episodes By Name
+            8.- Search Episodes By Title
             9.- Top 5 Episodes By Series
             
             0.- Exit
         """.trimIndent()
 
         println()
-        println("Write option: ")
+        println("Enter the option: ")
         println(menu)
         return readln().toIntOrNull()
     }
@@ -78,7 +79,7 @@ class MenuMain (
         val seriesData = getSeriesData()
         println(seriesData)
         if (seriesData.totalSeasons.isEmpty() || !seriesData.type.equals("Series", ignoreCase = true))
-            throw RuntimeException("${seriesData.title}, not found or maybe is not a Series")
+            throw RuntimeException("${seriesData.title}, not found or maybe is not a Series: ${seriesData.type}")
 
         val series = SeriesMapper().mapToSeries(seriesData)
         println(series)
@@ -86,7 +87,7 @@ class MenuMain (
         try {
             seriesRepository.save(series)
         } catch (ex: ConstraintViolationException) {
-            println("Serie ya esta en la db: ${ex.message}")
+            println("Series already exists in database: ${ex.message}")
         }
     }
 
@@ -96,7 +97,7 @@ class MenuMain (
         var inputSeriesName = inputSeriesName()
 
         while (inputSeriesName.isNullOrEmpty()) {
-            println("Invalid entry, please, try again")
+            println("Invalid entry, please try again")
             inputSeriesName = inputSeriesName()
         }
         inputSeriesName = inputSeriesName.trim()
@@ -119,7 +120,7 @@ class MenuMain (
 
                 printEpisodesData(seasons)
             }
-        } ?: println("$inputSeriesName, Not found")
+        } ?: println("$inputSeriesName not found")
     }
 
     private fun inputSeriesName(): String? {
@@ -136,19 +137,18 @@ class MenuMain (
     }
 
     private fun searchSeriesByTitle() {
-        var title = inputSeriesByTitle()
+        var title = inputSeriesByTitle()?.trim()
         while (title.isNullOrEmpty()) {
-            println("Invalid entry, please, try again")
-            title = inputSeriesByTitle()
+            println("Invalid entry, please try again")
+            title = inputSeriesByTitle()?.trim()
         }
-        title = title.trim()
 
-        val searchedSeries = seriesRepository.findByTitleContainsIgnoreCase(title)
+        searchedSeries = seriesRepository.findByTitleContainsIgnoreCase(title)
 
         searchedSeries?.let {
             println("Series found: ")
             println(searchedSeries)
-        } ?: println("Not found with: $title")
+        } ?: println("$title not found")
     }
 
     private fun inputSeriesByTitle(): String? {
@@ -167,7 +167,7 @@ class MenuMain (
     private fun searchByGenreSeries() {
         var entryGenre = inputSeriesByGenre()?.trim()
         while (entryGenre.isNullOrEmpty()) {
-            println("Invalid entry, please, try again")
+            println("Invalid entry, please try again")
             entryGenre = inputSeriesByGenre()?.trim()
         }
         val genre = parseGenres(entryGenre)
@@ -177,7 +177,7 @@ class MenuMain (
         if (seriesByGenre.isNotEmpty())
             seriesByGenre.forEachIndexed { i, s -> println("${i+1}.- $s") }
         else
-            println("Not found series by this genre: $genre")
+            println("Series not found by genre: $genre")
     }
 
     private fun inputSeriesByGenre(): String? {
@@ -187,7 +187,7 @@ class MenuMain (
 
     private fun parseGenres(genre: String): Genre =
         Genre.fromEsp(genre) ?: Genre.fromString(genre)
-        ?: throw IllegalArgumentException("No valid genre found: $genre")
+        ?: throw IllegalArgumentException("Genre: $genre not found")
 
     private fun filterSeriesBySeasonAndEvaluation() {
         var totalSeason = entrySeason()
@@ -202,27 +202,62 @@ class MenuMain (
             evaluation = entryEvaluation()
         }
 
-        val seriesBySeasonAndEvaluation = seriesRepository
-            .findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason, evaluation)
+        //val seriesBySeasonAndEvaluation = seriesRepository.
+        // findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason, evaluation)
+        //val seriesBySeasonAndEvaluation = seriesRepository.seriesBySeasonAndEvaluation()
+        val seriesBySeasonAndEvaluation = seriesRepository.selectSeriesBySeasonAndEvaluation(totalSeason, evaluation)
 
         if (seriesBySeasonAndEvaluation.isNotEmpty())
             seriesBySeasonAndEvaluation.forEachIndexed { i, s ->
                 println("${i+1}.- ${s.title} - evaluation: ${s.evaluation}, total season: ${s.totalSeasons}, genre: ${s.genre}")
             }
         else
-            println("Not found series")
+            println("Series not found")
     }
 
     private fun entrySeason(): Int? {
-        println()
-        println("Filter series with how many seasons")
+        println("\nFilter series with how many seasons")
         return readlnOrNull()?.toIntOrNull()
     }
 
     private fun entryEvaluation(): Double? {
-        println()
-        println("With evaluation, starting from which value")
+        println("\nWith evaluation, starting from which value")
         return readlnOrNull()?.toDoubleOrNull()
+    }
+
+    private fun searchEpisodeByTitle() {
+        var episodeTitle = entryEpisodeByTitle()?.trim()
+        while (episodeTitle.isNullOrEmpty()) {
+            println("Invalid entry, please try again")
+            episodeTitle = entryEpisodeByTitle()?.trim()
+        }
+
+        val episodes = seriesRepository.episodesByTitle(episodeTitle)
+
+        if (episodes.isNotEmpty())
+            episodes.forEachIndexed { i, e -> println("${i+1}.- ${e.series.title} - $e") }
+        else
+            println("Episodes not found")
+    }
+
+    private fun entryEpisodeByTitle(): String? {
+        println("\nEnter title of the episode to search: ")
+        return readlnOrNull()
+    }
+
+    private fun searchTop5EpisodesBySeries() {
+
+        searchSeriesByTitle()
+
+        searchedSeries?.let {
+            val episodes = seriesRepository.top5EpisodesBySeries(searchedSeries!!)
+            if (episodes.isNotEmpty()) {
+                println("Series: ${episodes[0].series.title}")
+                episodes.forEachIndexed { i, e -> println("${i+1}.- $e") }
+            }
+            else
+                println("Episodes not found")
+        }
     }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {
@@ -256,7 +291,7 @@ class MenuMain (
 
         var inputSeriesName = getSeriesName()
         while (inputSeriesName.isNullOrEmpty()) {
-            println("Invalid entry, please, try again")
+            println("Invalid entry, please try again")
             inputSeriesName = getSeriesName()
         }
         inputSeriesName = inputSeriesName.trim().lowercase()

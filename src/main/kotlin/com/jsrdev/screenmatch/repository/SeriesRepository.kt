@@ -1,7 +1,14 @@
 package com.jsrdev.screenmatch.repository
 
+import com.jsrdev.screenmatch.model.Genre
 import com.jsrdev.screenmatch.model.Series
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface SeriesRepository : JpaRepository<Series, UUID>
+interface SeriesRepository : JpaRepository<Series, UUID> {
+
+    fun findByTitleContainsIgnoreCase(title: String): Series?
+    fun findTop5ByOrderByEvaluationDesc(): List<Series>
+    fun findByGenre(genre: Genre): List<Series>
+    fun findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason: Int, evaluation: Double): List<Series>
+}

@@ -202,8 +202,10 @@ class MenuMain (
             evaluation = entryEvaluation()
         }
 
-        val seriesBySeasonAndEvaluation = seriesRepository
-            .findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason, evaluation)
+        //val seriesBySeasonAndEvaluation = seriesRepository.
+        // findByTotalSeasonsLessThanEqualAndEvaluationGreaterThanEqual(totalSeason, evaluation)
+        //val seriesBySeasonAndEvaluation = seriesRepository.seriesBySeasonAndEvaluation()
+        val seriesBySeasonAndEvaluation = seriesRepository.selectSeriesBySeasonAndEvaluation(totalSeason, evaluation)
 
         if (seriesBySeasonAndEvaluation.isNotEmpty())
             seriesBySeasonAndEvaluation.forEachIndexed { i, s ->

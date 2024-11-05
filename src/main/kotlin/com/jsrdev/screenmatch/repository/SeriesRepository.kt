@@ -28,4 +28,7 @@ interface SeriesRepository : JpaRepository<Series, UUID> {
 
     @Query("SELECT e FROM Series s JOIN s.episodes e WHERE e.title ILIKE %:episodeTitle%")
     fun episodesByTitle(episodeTitle: String): List<Episode>
+
+    @Query("SELECT e FROM Series AS s JOIN s.episodes e WHERE s = :series ORDER BY e.evaluation DESC LIMIT 5")
+    fun top5EpisodesBySeries(series: Series): List<Episode>
 }

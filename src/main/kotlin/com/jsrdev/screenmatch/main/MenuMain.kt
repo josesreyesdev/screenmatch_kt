@@ -18,6 +18,7 @@ class MenuMain (
 ) {
 
     private var series: MutableList<Series> = mutableListOf()
+    private var searchedSeries: Series? = null
 
     fun showMenu() {
         while (true) {
@@ -35,7 +36,7 @@ class MenuMain (
                 6 -> searchByGenreSeries()
                 7 -> filterSeriesBySeasonAndEvaluation()
                 8 -> searchEpisodeByTitle()
-                9 -> {}
+                9 -> searchTop5EpisodesBySeries()
 
                 0 -> {
                     println("****** Ejecución Finalizada ******")
@@ -136,14 +137,13 @@ class MenuMain (
     }
 
     private fun searchSeriesByTitle() {
-        var title = inputSeriesByTitle()
+        var title = inputSeriesByTitle()?.trim()
         while (title.isNullOrEmpty()) {
             println("Invalid entry, please try again")
-            title = inputSeriesByTitle()
+            title = inputSeriesByTitle()?.trim()
         }
-        title = title.trim()
 
-        val searchedSeries = seriesRepository.findByTitleContainsIgnoreCase(title)
+        searchedSeries = seriesRepository.findByTitleContainsIgnoreCase(title)
 
         searchedSeries?.let {
             println("Series found: ")
@@ -243,6 +243,21 @@ class MenuMain (
     private fun entryEpisodeByTitle(): String? {
         println("\nEnter title of the episode to search: ")
         return readlnOrNull()
+    }
+
+    private fun searchTop5EpisodesBySeries() {
+
+        searchSeriesByTitle()
+
+        searchedSeries?.let {
+            val episodes = seriesRepository.top5EpisodesBySeries(searchedSeries!!)
+            if (episodes.isNotEmpty()) {
+                println("Series: ${episodes[0].series.title}")
+                episodes.forEachIndexed { i, e -> println("${i+1}.- $e") }
+            }
+            else
+                println("Episodes not found")
+        }
     }
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {

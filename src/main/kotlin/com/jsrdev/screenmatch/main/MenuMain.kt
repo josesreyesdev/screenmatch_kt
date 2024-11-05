@@ -32,7 +32,7 @@ class MenuMain (
                 3 -> showSearchedSeries()
                 4 -> searchSeriesByTitle()
                 5 -> searchTop5Series()
-                6 -> {}
+                6 -> searchByGenreSeries()
                 7 -> {}
                 8 -> {}
                 9 -> {}
@@ -163,6 +163,31 @@ class MenuMain (
             println("${i+1}.- Series: ${s.title}, evaluation: ${s.evaluation}")
         }
     }
+
+    private fun searchByGenreSeries() {
+        var entryGenre = inputSeriesByGenre()?.trim()
+        while (entryGenre.isNullOrEmpty()) {
+            println("Invalid entry, please, try again")
+            entryGenre = inputSeriesByGenre()?.trim()
+        }
+        val genre = parseGenres(entryGenre)
+
+        val seriesByGenre: List<Series> = seriesRepository.findByGenre(genre)
+
+        if (seriesByGenre.isNotEmpty())
+            seriesByGenre.forEachIndexed { i, s -> println("${i+1}.- $s") }
+        else
+            println("Not found series by this genre: $genre")
+    }
+
+    private fun inputSeriesByGenre(): String? {
+        println("\nEnter the series genre: ")
+        return readlnOrNull()
+    }
+
+    private fun parseGenres(genre: String): Genre =
+        Genre.fromEsp(genre) ?: Genre.fromString(genre)
+        ?: throw IllegalArgumentException("No valid genre found: $genre")
 
     private fun getSeasonsData(series: Series): MutableList<SeasonData> {
         val seasons = mutableListOf<SeasonData>()

@@ -6,7 +6,7 @@ import com.jsrdev.screenmatch.model.*
 import com.jsrdev.screenmatch.repository.SeriesRepository
 import com.jsrdev.screenmatch.service.ConvertData
 import com.jsrdev.screenmatch.service.GetFilmData
-import com.jsrdev.screenmatch.utils.Config
+import com.jsrdev.screenmatch.utils.Constants
 import org.hibernate.exception.ConstraintViolationException
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -321,7 +321,7 @@ class MenuMain (
         URLEncoder.encode(seriesName, StandardCharsets.UTF_8)
 
     private fun buildURL(seriesName: String, seasonNumber : Int?, episodeNumber: Int?): String {
-        val apiKey: String = Config.API_KEY_OMDBAPI
+        val apiKey: String = Constants.API_KEY_OMDBAPI
         val urlBuilder: StringBuilder = StringBuilder("https://www.omdbapi.com/?t=")
 
         urlBuilder.append(seriesName).append("&apikey=").append(apiKey)

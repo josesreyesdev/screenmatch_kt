@@ -12,9 +12,14 @@ import org.springframework.web.bind.annotation.RestController
 class SeriesController @Autowired constructor(private val service: SeriesService) {
 
     @GetMapping
-    fun getAllSeries(): List<SeriesResponse> = service.getAllSeries()
+    fun getAllSeries(): List<SeriesResponse> =
+        service.getAllSeries()
 
     @GetMapping("/top5")
-    fun getTop5Series(): List<SeriesResponse> = service.getTop5Series()
+    fun getTop5Series(): List<SeriesResponse> =
+        service.getTop5Series()
 
+    @GetMapping("/releases")
+    fun getRecentSeriesReleases(): List<SeriesResponse> =
+        service.getRecentSeriesReleases()
 }

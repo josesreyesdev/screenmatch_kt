@@ -16,9 +16,11 @@ class SeriesService @Autowired constructor(private val repository: SeriesReposit
     fun getTop5Series(): List<SeriesResponse> =
         seriesResponses(repository.findTop5ByOrderByEvaluationDesc())
 
+    fun getRecentSeriesReleases(): List<SeriesResponse> =
+        seriesResponses(repository.mostRecentReleases())
+
     private fun seriesResponses(seriesList: List<Series>): List<SeriesResponse> =
         seriesList.asSequence()
         .map { SeriesResponseMapper().mapToSeriesResponse(it) }
         .toList()
-
 }

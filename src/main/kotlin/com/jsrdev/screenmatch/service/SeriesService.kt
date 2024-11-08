@@ -6,6 +6,7 @@ import com.jsrdev.screenmatch.model.Series
 import com.jsrdev.screenmatch.repository.SeriesRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class SeriesService @Autowired constructor(private val repository: SeriesRepository) {
@@ -23,4 +24,13 @@ class SeriesService @Autowired constructor(private val repository: SeriesReposit
         seriesList.asSequence()
         .map { SeriesResponseMapper().mapToSeriesResponse(it) }
         .toList()
+
+    fun getSeriesById(id: UUID): SeriesResponse? {
+        val series: Optional<Series> = repository.findById(id)
+
+        return if (series.isPresent) seriesResponse(series.get()) else null
+    }
+
+    private fun seriesResponse(series: Series): SeriesResponse =
+        SeriesResponseMapper().mapToSeriesResponse(series)
 }

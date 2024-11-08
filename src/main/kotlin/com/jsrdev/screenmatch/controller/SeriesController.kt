@@ -14,6 +14,7 @@ class SeriesController @Autowired constructor(private val service: SeriesService
     @GetMapping
     fun getAllSeries(): List<SeriesResponse> = service.getAllSeries()
 
-
+    @GetMapping("/top5")
+    fun getTop5Series(): List<SeriesResponse> = service.getTop5Series()
 
 }

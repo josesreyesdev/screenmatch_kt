@@ -5,6 +5,7 @@ import com.jsrdev.screenmatch.dto.SeriesResponse
 import com.jsrdev.screenmatch.mappers.EpisodeResponseMapper
 import com.jsrdev.screenmatch.mappers.SeriesResponseMapper
 import com.jsrdev.screenmatch.model.Episode
+import com.jsrdev.screenmatch.model.Genre
 import com.jsrdev.screenmatch.model.Series
 import com.jsrdev.screenmatch.repository.SeriesRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,6 +23,12 @@ class SeriesService @Autowired constructor(private val repository: SeriesReposit
 
     fun getRecentSeriesReleases(): List<SeriesResponse> =
         seriesResponses(repository.mostRecentReleases(10))
+
+    fun getSeriesByGenre(genre: String): List<SeriesResponse> {
+        val genreParse: Genre = Genre.parseGenres(genre)
+
+        return seriesResponses(repository.findByGenre(genreParse))
+    }
 
     private fun seriesResponses(seriesList: List<Series>): List<SeriesResponse> =
         seriesList.asSequence()

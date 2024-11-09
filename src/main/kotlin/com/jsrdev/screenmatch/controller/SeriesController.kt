@@ -37,4 +37,8 @@ class SeriesController @Autowired constructor(private val service: SeriesService
     @GetMapping("/{id}/seasons/{season}")
     fun getEpisodesBySeason(@PathVariable id: UUID, @PathVariable season: Int): List<EpisodeResponse> =
         service.getEpisodesBySeason(id, season)
+
+    @GetMapping("/genre/{genre}")
+    fun getSeriesByGenre(@PathVariable genre: String): List<SeriesResponse>? =
+        service.getSeriesByGenre(genre)
 }

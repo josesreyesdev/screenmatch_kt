@@ -30,6 +30,10 @@ class SeriesController @Autowired constructor(private val service: SeriesService
     fun getSeriesById(@PathVariable id: UUID): SeriesResponse? =
         service.getSeriesById(id)
 
+    @GetMapping("/genre/{genre}")
+    fun getSeriesByGenre(@PathVariable genre: String): List<SeriesResponse>? =
+        service.getSeriesByGenre(genre)
+
     @GetMapping("/{id}/seasons/all")
     fun getAllEpisodes(@PathVariable id: UUID): List<EpisodeResponse>? =
         service.getAllEpisodes(id)
@@ -38,7 +42,7 @@ class SeriesController @Autowired constructor(private val service: SeriesService
     fun getEpisodesBySeason(@PathVariable id: UUID, @PathVariable season: Int): List<EpisodeResponse> =
         service.getEpisodesBySeason(id, season)
 
-    @GetMapping("/genre/{genre}")
-    fun getSeriesByGenre(@PathVariable genre: String): List<SeriesResponse>? =
-        service.getSeriesByGenre(genre)
+    @GetMapping("/{id}/seasons/top")
+    fun getTopEpisodesBySeries(@PathVariable id: UUID): List<EpisodeResponse>? =
+        service.getTopEpisodesBySeries(id)
 }

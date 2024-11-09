@@ -64,6 +64,15 @@ class SeriesService @Autowired constructor(private val repository: SeriesReposit
         return episodesResponses(repository.getEpisodesBySeason(id, season))
     }
 
+    fun getTopEpisodesBySeries(id: UUID): List<EpisodeResponse>? {
+        val series: Optional<Series> = repository.findById(id)
+
+        return if (series.isPresent) {
+            val episodes = repository.top5EpisodesBySeries(series.get())
+            episodesResponses(episodes)
+        } else null
+    }
+
     private fun episodesResponses(episodeList: List<Episode>): List<EpisodeResponse> =
         episodeList.asSequence()
             .map { EpisodeResponseMapper().mapToEpisodeResponse(it) }

@@ -31,4 +31,7 @@ interface SeriesRepository : JpaRepository<Series, UUID> {
 
     @Query("SELECT e FROM Series AS s JOIN s.episodes e WHERE s = :series ORDER BY e.evaluation DESC LIMIT 5")
     fun top5EpisodesBySeries(series: Series): List<Episode>
+
+    @Query("SELECT s FROM Series AS s JOIN s.episodes e GROUP BY s ORDER BY MAX(e.releaseDate) DESC LIMIT :mostRecent")
+    fun mostRecentReleases(mostRecent: Int): List<Series>
 }

@@ -1,6 +1,6 @@
 package com.jsrdev.screenmatch.service
 
-import com.jsrdev.screenmatch.utils.Config
+import com.jsrdev.screenmatch.utils.Constants
 import com.theokanning.openai.completion.CompletionRequest
 import com.theokanning.openai.completion.CompletionResult
 import com.theokanning.openai.service.OpenAiService
@@ -9,7 +9,7 @@ class OpenAIService {
 
     companion object {
         fun getTranslation(text: String): String {
-            val service = OpenAiService(Config.API_KEY_OPENAI)
+            val service = OpenAiService(Constants.API_KEY_OPENAI)
 
             val requisition: CompletionRequest = CompletionRequest.builder()
                 .model("gpt-3.5-turbo-instruct")

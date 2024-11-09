@@ -9,7 +9,8 @@ enum class Genre(val genreOmdb: String, val genreEsp: String) {
     DRAMA("Drama", "Drama"),
     CRIME("Crime", "Crimen"),
     SHORT("Short", "Corto"),
-    HORROR("Horror", "Horror");
+    HORROR("Horror", "Terror"),
+    ADVENTURE("Adventure", "Aventura");
 
     companion object {
         fun fromString(text: String): Genre? {
@@ -27,6 +28,10 @@ enum class Genre(val genreOmdb: String, val genreEsp: String) {
                 .replace(Regex("\\p{M}"), "")
                 .lowercase()
         }
+
+        fun parseGenres(genre: String): Genre =
+            Genre.fromEsp(genre) ?: Genre.fromString(genre)
+            ?: throw IllegalArgumentException("Genre: $genre not found")
     }
 }
 

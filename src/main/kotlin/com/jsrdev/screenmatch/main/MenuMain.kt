@@ -170,7 +170,7 @@ class MenuMain (
             println("Invalid entry, please try again")
             entryGenre = inputSeriesByGenre()?.trim()
         }
-        val genre = parseGenres(entryGenre)
+        val genre: Genre = Genre.parseGenres(entryGenre)
 
         val seriesByGenre: List<Series> = seriesRepository.findByGenre(genre)
 
@@ -184,10 +184,6 @@ class MenuMain (
         println("\nEnter the series genre: ")
         return readlnOrNull()
     }
-
-    private fun parseGenres(genre: String): Genre =
-        Genre.fromEsp(genre) ?: Genre.fromString(genre)
-        ?: throw IllegalArgumentException("Genre: $genre not found")
 
     private fun filterSeriesBySeasonAndEvaluation() {
         var totalSeason = entrySeason()

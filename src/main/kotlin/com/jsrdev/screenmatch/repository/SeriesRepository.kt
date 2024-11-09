@@ -34,4 +34,7 @@ interface SeriesRepository : JpaRepository<Series, UUID> {
 
     @Query("SELECT s FROM Series AS s JOIN s.episodes e GROUP BY s ORDER BY MAX(e.releaseDate) DESC LIMIT :mostRecent")
     fun mostRecentReleases(mostRecent: Int): List<Series>
+
+    @Query("SELECT e FROM Series s JOIN s.episodes e WHERE s.id = :id AND e.season = :season")
+    fun getEpisodesBySeason(id: UUID, season: Int): List<Episode>
 }

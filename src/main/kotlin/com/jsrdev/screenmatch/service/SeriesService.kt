@@ -1,7 +1,10 @@
 package com.jsrdev.screenmatch.service
 
+import com.jsrdev.screenmatch.dto.EpisodeResponse
 import com.jsrdev.screenmatch.dto.SeriesResponse
+import com.jsrdev.screenmatch.mappers.EpisodeResponseMapper
 import com.jsrdev.screenmatch.mappers.SeriesResponseMapper
+import com.jsrdev.screenmatch.model.Episode
 import com.jsrdev.screenmatch.model.Series
 import com.jsrdev.screenmatch.repository.SeriesRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,4 +36,17 @@ class SeriesService @Autowired constructor(private val repository: SeriesReposit
 
     private fun seriesResponse(series: Series): SeriesResponse =
         SeriesResponseMapper().mapToSeriesResponse(series)
+
+    fun getAllEpisodes(id: UUID): List<EpisodeResponse>? {
+        val series: Optional<Series> = repository.findById(id)
+
+        return if (series.isPresent) {
+            episodesResponses(series.get().episodes)
+        } else null
+    }
+
+    private fun episodesResponses(episodeList: List<Episode>): List<EpisodeResponse> =
+        episodeList.asSequence()
+            .map { EpisodeResponseMapper().mapToEpisodeResponse(it) }
+            .toList()
 }

@@ -1,5 +1,6 @@
 package com.jsrdev.screenmatch.controller
 
+import com.jsrdev.screenmatch.dto.EpisodeResponse
 import com.jsrdev.screenmatch.dto.SeriesResponse
 import com.jsrdev.screenmatch.service.SeriesService
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,4 +29,8 @@ class SeriesController @Autowired constructor(private val service: SeriesService
     @GetMapping("/{id}")
     fun getSeriesById(@PathVariable id: UUID): SeriesResponse? =
         service.getSeriesById(id)
+
+    @GetMapping("/{id}/seasons/all")
+    fun getAllEpisodes(@PathVariable id: UUID): List<EpisodeResponse>? =
+        service.getAllEpisodes(id)
 }
